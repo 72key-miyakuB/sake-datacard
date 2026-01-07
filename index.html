@@ -1,0 +1,862 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Sake Council Tokyo | Sake Sheet</title>
+  <meta name="description" content="Sake bottle info (JP/EN) with quick visuals + shared reviews." />
+  <style>
+    :root{
+      --bg:#0b0d12;
+      --panel: rgba(255,255,255,.06);
+      --panel2: rgba(255,255,255,.09);
+      --line: rgba(255,255,255,.12);
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.68);
+      --accent:#d7b56d;
+      --ok:#7ee3a6;
+      --warn:#ffcf6b;
+      --danger:#ff7a7a;
+      --r:18px;
+      --shadow: 0 14px 40px rgba(0,0,0,.45);
+      --font: ui-sans-serif, system-ui, -apple-system, "Hiragino Sans", "Noto Sans JP", Segoe UI, Roboto, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    }
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      background: radial-gradient(1200px 700px at 20% 0%, rgba(215,181,109,.10), transparent 60%),
+                  radial-gradient(1000px 600px at 90% 15%, rgba(126,227,166,.08), transparent 55%),
+                  var(--bg);
+      color:var(--text);
+      font-family:var(--font);
+      line-height:1.45;
+    }
+    a{ color:inherit; text-decoration:none; }
+    .wrap{ max-width: 980px; margin: 0 auto; padding: 18px; }
+    header{
+      display:flex; gap:12px; align-items:center; justify-content:space-between;
+      margin: 10px 0 14px;
+    }
+    .brand{ display:flex; flex-direction:column; gap:2px; }
+    .brand .name{ font-weight: 750; letter-spacing:.2px; }
+    .brand .sub{ color:var(--muted); font-size: 12px; }
+    .pill{
+      display:inline-flex; align-items:center; gap:8px;
+      padding: 8px 10px; border: 1px solid var(--line);
+      border-radius: 999px; background: rgba(255,255,255,.03);
+      font-size: 12px; color: var(--muted);
+      white-space:nowrap;
+    }
+    .grid{ display:grid; grid-template-columns: 1.1fr .9fr; gap: 14px; }
+    @media (max-width: 860px){ .grid{ grid-template-columns: 1fr; } }
+    .card{
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.04));
+      border-radius: var(--r);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .card .hd{
+      padding: 14px 14px 10px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255,255,255,.03);
+      display:flex; gap:12px; align-items:flex-start; justify-content:space-between;
+    }
+    .title{ display:flex; flex-direction:column; gap:4px; min-width: 0; }
+    .title .jp{ font-size: 18px; font-weight: 800; }
+    .title .en{ font-size: 12px; color: var(--muted); }
+    .tags{ display:flex; flex-wrap:wrap; gap:6px; justify-content:flex-end; }
+    .tag{
+      font-size: 11px;
+      padding: 6px 8px;
+      border: 1px solid var(--line);
+      background: rgba(0,0,0,.18);
+      border-radius: 999px;
+      color: var(--muted);
+    }
+    .body{ padding: 14px; }
+    .row{ display:flex; gap:10px; flex-wrap:wrap; }
+    .kpi{
+      flex:1; min-width: 170px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(255,255,255,.03);
+    }
+    .kpi .k{ font-size: 11px; color: var(--muted); display:flex; justify-content:space-between; gap:10px; }
+    .kpi .v{ font-size: 14px; font-weight: 750; margin-top: 4px; }
+    .mini{ font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .table{
+      width:100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      font-size: 13px;
+    }
+    .table th,.table td{
+      border-top: 1px solid var(--line);
+      padding: 10px 8px;
+      vertical-align: top;
+    }
+    .table th{ text-align:left; color: var(--muted); width: 34%; font-weight: 650; }
+    .muted{ color: var(--muted); }
+    .viz{ display:grid; grid-template-columns: 1fr; gap: 10px; }
+    .bar{
+      display:flex; align-items:center; gap:10px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(255,255,255,.03);
+    }
+    .bar .label{ width: 84px; font-size: 12px; color: var(--muted); }
+    .track{
+      flex:1; height: 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.08);
+      overflow:hidden;
+      border: 1px solid rgba(255,255,255,.08);
+    }
+    .fill{
+      height:100%;
+      width: 50%;
+      background: linear-gradient(90deg, rgba(215,181,109,.95), rgba(126,227,166,.85));
+    }
+    .bar .val{ width: 28px; text-align:right; font-size: 12px; color: var(--muted); }
+    .chart{
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(255,255,255,.03);
+    }
+    .chart .caption{
+      display:flex; justify-content:space-between; align-items:center;
+      font-size:12px; color: var(--muted); margin-bottom: 8px;
+    }
+    .svgwrap{ width:100%; display:flex; justify-content:center; }
+    .actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top: 12px; }
+    button, .btn{
+      appearance:none; border:none;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: rgba(215,181,109,.18);
+      border: 1px solid rgba(215,181,109,.35);
+      color: var(--text);
+      font-weight: 700;
+      cursor:pointer;
+    }
+    button.secondary, .btn.secondary{
+      background: rgba(255,255,255,.05);
+      border: 1px solid var(--line);
+      color: var(--text);
+      font-weight: 650;
+    }
+    .btn{ display:inline-flex; align-items:center; gap:8px; }
+    .hint{ font-size: 11px; color: var(--muted); margin-top: 8px; }
+    .reviews{
+      display:flex; flex-direction:column; gap:10px;
+      margin-top: 12px;
+    }
+    .review{
+      border: 1px solid var(--line);
+      background: rgba(0,0,0,.18);
+      border-radius: 14px;
+      padding: 10px 12px;
+    }
+    .review .top{
+      display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap;
+      font-size: 12px; color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .review .msg{ font-size: 13px; }
+    .form{
+      margin-top: 10px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.03);
+      border-radius: 14px;
+      padding: 12px;
+    }
+    .formgrid{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
+    @media (max-width: 560px){ .formgrid{ grid-template-columns: 1fr; } }
+    input, textarea, select{
+      width:100%;
+      padding: 10px 10px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: rgba(0,0,0,.22);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 14px;
+      outline:none;
+    }
+    textarea{ min-height: 84px; resize: vertical; }
+    .footnote{
+      padding: 14px;
+      border-top: 1px solid var(--line);
+      font-size: 12px;
+      color: var(--muted);
+      display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px;
+      background: rgba(255,255,255,.02);
+    }
+    .list{
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: 10px;
+    }
+    @media (max-width: 700px){ .list{ grid-template-columns: 1fr; } }
+    .item{
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(255,255,255,.03);
+      padding: 12px;
+      display:flex; flex-direction:column; gap:8px;
+    }
+    .item .n{ font-weight: 800; }
+    .item .s{ color: var(--muted); font-size: 12px; }
+    .item .go{ margin-top:auto; }
+    .badge{
+      display:inline-flex; align-items:center; gap:6px;
+      font-size: 11px; color: var(--muted);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 6px 8px;
+      width: fit-content;
+      background: rgba(0,0,0,.12);
+    }
+    .warnbox{
+      border: 1px solid rgba(255,207,107,.45);
+      background: rgba(255,207,107,.08);
+      color: rgba(255,255,255,.85);
+      border-radius: 14px;
+      padding: 10px 12px;
+      font-size: 12px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <div class="name">The Sake Council Tokyo</div>
+        <div class="sub">Sake Bottle Info / 銘柄情報（QR）</div>
+      </div>
+      <div class="pill" id="status">Loading…</div>
+    </header>
+
+    <main class="grid">
+      <!-- Left: Sake Sheet -->
+      <section class="card" id="sheetCard" style="display:none;">
+        <div class="hd">
+          <div class="title">
+            <div class="jp" id="name_jp">—</div>
+            <div class="en" id="name_en">—</div>
+          </div>
+          <div class="tags" id="tags"></div>
+        </div>
+
+        <div class="body">
+          <div class="row">
+            <div class="kpi">
+              <div class="k"><span>蔵 / Brewery</span><span class="muted">JP/EN</span></div>
+              <div class="v" id="brewery">—</div>
+              <div class="mini" id="region">—</div>
+            </div>
+            <div class="kpi">
+              <div class="k"><span>タイプ / Type</span><span class="muted">Style</span></div>
+              <div class="v" id="style">—</div>
+              <div class="mini" id="rice">—</div>
+            </div>
+            <div class="kpi">
+              <div class="k"><span>スペック / Spec</span><span class="muted">ABV・SMV</span></div>
+              <div class="v" id="spec">—</div>
+              <div class="mini" id="polish">—</div>
+            </div>
+          </div>
+
+          <table class="table" aria-label="Sake quick table">
+            <tr><th>香り / Aroma</th><td id="aroma">—</td></tr>
+            <tr><th>味わい / Palate</th><td id="palate">—</td></tr>
+            <tr><th>相性 / Pairing</th><td id="pairing">—</td></tr>
+            <tr><th>温度 / Temp</th><td id="temp">—</td></tr>
+            <tr><th>グラス / Glass</th><td id="glass">—</td></tr>
+            <tr><th>ひと言 / One-liner</th><td id="copy">—</td></tr>
+          </table>
+
+          <div class="actions">
+            <a class="btn secondary" id="copyLinkBtn" href="#">🔗 Link / リンク</a>
+            <button class="secondary" id="copyQrTextBtn" type="button">📎 QR用URLコピー</button>
+          </div>
+
+          <div class="hint">
+            ※ QRは <span class="muted">index.html?id=銘柄ID</span> を想定（CSVのid列）。
+          </div>
+        </div>
+
+        <div class="footnote">
+          <span>✅ Reviews are shared across devices (Firestore).</span>
+          <span class="muted">投稿は全端末に反映</span>
+        </div>
+      </section>
+
+      <!-- Right: Visuals + Reviews -->
+      <aside class="card" id="sideCard" style="display:none;">
+        <div class="hd">
+          <div class="title">
+            <div class="jp">ビジュアル / Visual</div>
+            <div class="en">Quick taste map + shared reviews</div>
+          </div>
+          <div class="tags">
+            <span class="tag" id="idTag">id: —</span>
+          </div>
+        </div>
+
+        <div class="body">
+          <div class="viz">
+            <!-- Bars -->
+            <div class="bar">
+              <div class="label">甘辛 / Sweet-Dry</div>
+              <div class="track"><div class="fill" id="bar_sweet"></div></div>
+              <div class="val" id="val_sweet">—</div>
+            </div>
+            <div class="bar">
+              <div class="label">香り / Aroma</div>
+              <div class="track"><div class="fill" id="bar_aroma"></div></div>
+              <div class="val" id="val_aroma">—</div>
+            </div>
+            <div class="bar">
+              <div class="label">コク / Body</div>
+              <div class="track"><div class="fill" id="bar_body"></div></div>
+              <div class="val" id="val_body">—</div>
+            </div>
+            <div class="bar">
+              <div class="label">酸 / Acidity</div>
+              <div class="track"><div class="fill" id="bar_acid"></div></div>
+              <div class="val" id="val_acid">—</div>
+            </div>
+
+            <!-- Mini chart -->
+            <div class="chart">
+              <div class="caption">
+                <span>味わいマップ / Taste Map</span>
+                <span class="muted">0–5</span>
+              </div>
+              <div class="svgwrap" id="tasteSvgWrap"></div>
+              <div class="hint muted">※数値はCSVの (sweet, aroma_intensity, body, acidity) を使用。</div>
+            </div>
+
+            <!-- Reviews -->
+            <div>
+              <div class="row" style="justify-content:space-between; align-items:center;">
+                <div class="badge">🗒 Reviews / レビュー</div>
+                <div class="badge" id="ratingBadge">—</div>
+              </div>
+
+              <div class="reviews" id="reviews"></div>
+
+              <div class="form" aria-label="Review form">
+                <div class="formgrid">
+                  <div>
+                    <div class="muted" style="font-size:12px; margin:0 0 6px;">Name / お名前</div>
+                    <input id="rv_name" placeholder="e.g. Alex / アレックス" maxlength="30" />
+                  </div>
+                  <div>
+                    <div class="muted" style="font-size:12px; margin:0 0 6px;">Rating / 評価</div>
+                    <select id="rv_rating">
+                      <option value="5">★★★★★ (5)</option>
+                      <option value="4">★★★★☆ (4)</option>
+                      <option value="3">★★★☆☆ (3)</option>
+                      <option value="2">★★☆☆☆ (2)</option>
+                      <option value="1">★☆☆☆☆ (1)</option>
+                    </select>
+                  </div>
+                </div>
+                <div style="margin-top:10px;">
+                  <div class="muted" style="font-size:12px; margin:0 0 6px;">Comment / コメント</div>
+                  <textarea id="rv_msg" placeholder="Short impressions / ひとこと感想（短め推奨）" maxlength="240"></textarea>
+                </div>
+                <div class="actions" style="margin-top:10px;">
+                  <button id="submitReviewBtn" type="button">✍️ Post / 投稿</button>
+                  <button class="secondary" id="exportReviewsBtn" type="button">⬇️ Export JSON</button>
+                </div>
+                <div class="hint">
+                  ※ 全員共有（Firestore）。不適切投稿対策は「ルール/認証」で強化できます。
+                </div>
+                <div class="warnbox">
+                  Tip: Firestoreの無料枠でも多くの店舗運用は十分です。<br/>
+                  本格運用は「文字数制限/NGワード」「管理者だけ削除」「匿名ID付与」などを追加できます。
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </aside>
+
+      <!-- List view (when no id param) -->
+      <section class="card" id="listCard" style="display:none; grid-column: 1 / -1;">
+        <div class="hd">
+          <div class="title">
+            <div class="jp">銘柄一覧 / Sake List</div>
+            <div class="en">Tap a bottle to open its QR page.</div>
+          </div>
+          <div class="tags">
+            <span class="tag" id="countTag">—</span>
+          </div>
+        </div>
+        <div class="body">
+          <div class="list" id="list"></div>
+          <div class="hint">QRは <span class="muted">index.html?id=銘柄ID</span> を生成して貼り付けてください。</div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- ✅ Firebase (Firestore) SDK - compat版（単一HTMLで簡単運用） -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+  <script>
+    /**
+     * ✅ 使い方
+     * - 同階層に sake.csv を置く
+     * - QR: index.html?id=銘柄ID
+     *
+     * ✅ Firebase設定
+     * - 下の firebaseConfig を Firebase Console の値に差し替える
+     * - Firestoreのルールは下の「ルール例」を参照
+     */
+
+    // =========================
+    // 1) Firebase設定（要差し替え）
+    // =========================
+    const firebaseConfig = {
+        apiKey: "AIzaSyD1sbz6sLUMf6tabsjwvteEOoQB6vFlcZU",
+        authDomain: "the-sake-council-reviews.firebaseapp.com",
+        projectId: "the-sake-council-reviews",
+      // storageBucket / messagingSenderId / appId は不要なら省略してOK
+    };
+
+    // =========================
+    // 2) App settings
+    // =========================
+    const CSV_PATH = "./sake.csv";
+    const REVIEWS_COLLECTION = "reviews";   // Firestore collection name
+    const REVIEW_LIMIT = 60;                // 表示する最大件数
+    const statusEl = document.getElementById("status");
+
+    // Query param
+    const qs = new URLSearchParams(location.search);
+    const targetId = qs.get("id"); // per-bottle view
+    let currentSakeId = null;
+
+    // Firebase init
+    let db = null;
+    try{
+      firebase.initializeApp(firebaseConfig);
+      db = firebase.firestore();
+    }catch(e){
+      console.error(e);
+    }
+
+    // ---------- Helpers ----------
+    function clamp01(n){ return Math.max(0, Math.min(1, n)); }
+    function toNum(v, fallback=0){
+      const n = Number(String(v).replace(/[^\d.-]/g,""));
+      return Number.isFinite(n) ? n : fallback;
+    }
+    function escapeHtml(s){
+      return String(s)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+    function stars(n){
+      const k = Math.max(1, Math.min(5, Number(n)||0));
+      return "★★★★★".slice(0,k) + "☆☆☆☆☆".slice(0,5-k);
+    }
+
+    // ---------- CSV parsing ----------
+    function parseCSV(text){
+      // Simple CSV parser supporting quotes
+      const rows = [];
+      let cur = "", inQ = false;
+      const out = [];
+      for (let i=0;i<text.length;i++){
+        const ch = text[i];
+        const next = text[i+1];
+        if (ch === '"' && inQ && next === '"'){ cur += '"'; i++; continue; }
+        if (ch === '"'){ inQ = !inQ; continue; }
+        if (!inQ && ch === ","){ out.push(cur); cur=""; continue; }
+        if (!inQ && ch === "\n"){ out.push(cur); rows.push(out.slice()); out.length=0; cur=""; continue; }
+        if (ch === "\r") continue;
+        cur += ch;
+      }
+      out.push(cur);
+      if (out.some(v => v.length>0)) rows.push(out.slice());
+
+      const header = rows.shift().map(h => h.trim());
+      return rows
+        .filter(r => r.some(v => (v ?? "").trim() !== ""))
+        .map(r => {
+          const obj = {};
+          header.forEach((h, idx) => obj[h] = (r[idx] ?? "").trim());
+          return obj;
+        });
+    }
+
+    // ---------- visuals ----------
+    function setBar(elId, value0to5){
+      const v = Math.max(0, Math.min(5, toNum(value0to5, 0)));
+      const pct = (v/5)*100;
+      const el = document.getElementById(elId);
+      el.style.width = pct + "%";
+      return v;
+    }
+
+    function tasteSvg({sweet, aroma, body, acid}){
+      // Simple diamond chart (4 axes) in SVG
+      // top: aroma, right: sweet, bottom: body, left: acid
+      const W=220, H=160, cx=W/2, cy=H/2;
+      const max=5;
+      const r=58;
+
+      const a = clamp01(aroma/max)*r;
+      const s = clamp01(sweet/max)*r;
+      const b = clamp01(body/max)*r;
+      const ac = clamp01(acid/max)*r;
+
+      const pTop    = [cx, cy - a];
+      const pRight  = [cx + s, cy];
+      const pBottom = [cx, cy + b];
+      const pLeft   = [cx - ac, cy];
+
+      const grid = [1,2,3,4,5].map(i=>{
+        const rr = (i/max)*r;
+        return `<polygon points="${cx},${cy-rr} ${cx+rr},${cy} ${cx},${cy+rr} ${cx-rr},${cy}"
+                  fill="none" stroke="rgba(255,255,255,.10)" stroke-width="1"/>`;
+      }).join("");
+
+      return `
+        <svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="Taste chart">
+          ${grid}
+          <line x1="${cx}" y1="${cy-r}" x2="${cx}" y2="${cy+r}" stroke="rgba(255,255,255,.12)"/>
+          <line x1="${cx-r}" y1="${cy}" x2="${cx+r}" y2="${cy}" stroke="rgba(255,255,255,.12)"/>
+          <polygon points="${pTop.join(",")} ${pRight.join(",")} ${pBottom.join(",")} ${pLeft.join(",")}"
+                   fill="rgba(215,181,109,.25)" stroke="rgba(215,181,109,.75)" stroke-width="2"/>
+          <text x="${cx}" y="${cy-r-8}" text-anchor="middle" font-size="11" fill="rgba(255,255,255,.70)">Aroma</text>
+          <text x="${cx+r+8}" y="${cy+4}" text-anchor="start" font-size="11" fill="rgba(255,255,255,.70)">Sweet/Dry</text>
+          <text x="${cx}" y="${cy+r+18}" text-anchor="middle" font-size="11" fill="rgba(255,255,255,.70)">Body</text>
+          <text x="${cx-r-8}" y="${cy+4}" text-anchor="end" font-size="11" fill="rgba(255,255,255,.70)">Acidity</text>
+        </svg>
+      `;
+    }
+
+    // ---------- Firestore shared reviews ----------
+    function reviewDocToUi(doc){
+      const r = doc.data();
+      const d = r.ts?.toDate?.() ?? new Date();
+      return {
+        id: doc.id,
+        name: (r.name || "Guest"),
+        rating: Math.max(1, Math.min(5, Number(r.rating)||5)),
+        msg: (r.msg || ""),
+        dateText: d.toLocaleString()
+      };
+    }
+
+    function setRatingBadge(avg, count){
+      const b = document.getElementById("ratingBadge");
+      if (!count){
+        b.textContent = "—";
+        return;
+      }
+      b.textContent = `★ ${avg.toFixed(1)} / 5  (${count})`;
+    }
+
+    function renderReviewsShared(list){
+      const box = document.getElementById("reviews");
+      box.innerHTML = "";
+
+      if (!list || list.length === 0){
+        box.innerHTML = `<div class="hint muted">No reviews yet. / まだレビューはありません。</div>`;
+        setRatingBadge(0, 0);
+        return;
+      }
+
+      // average
+      const sum = list.reduce((a,b)=>a+(b.rating||0),0);
+      const avg = sum / list.length;
+      setRatingBadge(avg, list.length);
+
+      list.forEach(r => {
+        const el = document.createElement("div");
+        el.className = "review";
+        el.innerHTML = `
+          <div class="top">
+            <span>${escapeHtml(r.name)} · ${escapeHtml(stars(r.rating))}</span>
+            <span>${escapeHtml(r.dateText)}</span>
+          </div>
+          <div class="msg">${escapeHtml(r.msg)}</div>
+        `;
+        box.appendChild(el);
+      });
+    }
+
+    let unsubscribeReviews = null;
+    let lastReviewsCache = [];
+
+    function listenReviewsShared(sakeId){
+      if (!db){
+        statusEl.textContent = "Firebase init error / Firebase設定を確認";
+        renderReviewsShared([]);
+        return;
+      }
+
+      // stop old listener
+      if (typeof unsubscribeReviews === "function") unsubscribeReviews();
+
+      // Query: sakeId == X, orderBy ts desc, limit N
+      // ※ 初回に「インデックス作成が必要」と出たら、Firebase Consoleの案内リンクから作成してください（1回だけ）。
+      unsubscribeReviews = db.collection(REVIEWS_COLLECTION)
+        .where("sakeId", "==", sakeId)
+        .orderBy("ts", "desc")
+        .limit(REVIEW_LIMIT)
+        .onSnapshot(snapshot => {
+          const list = [];
+          snapshot.forEach(doc => list.push(reviewDocToUi(doc)));
+          lastReviewsCache = list;
+          renderReviewsShared(list);
+        }, err => {
+        console.error(err);
+        const code = err?.code ? ` (${err.code})` : "";
+        const msg  = err?.message ? err.message : String(err);
+        statusEl.textContent = `Review load error${code}: ${msg}`;
+        });
+        
+    }
+
+    async function postReviewShared(sakeId, {name, rating, msg}){
+      if (!db) throw new Error("Firestore not ready");
+      // Basic sanitization / guard rails
+      const clean = {
+        sakeId: String(sakeId || "").slice(0, 60),
+        name: String(name || "Guest").trim().slice(0, 30),
+        rating: Math.max(1, Math.min(5, Number(rating)||5)),
+        msg: String(msg || "").trim().slice(0, 240),
+        ts: firebase.firestore.FieldValue.serverTimestamp(),
+        // optional: userAgent for abuse checks later (can be removed)
+        ua: navigator.userAgent.slice(0, 120)
+      };
+      if (!clean.msg) throw new Error("Empty message");
+      await db.collection(REVIEWS_COLLECTION).add(clean);
+    }
+
+    function exportReviewsJSON(){
+      const data = lastReviewsCache.map(r => ({
+        name: r.name, rating: r.rating, msg: r.msg, date: r.dateText
+      }));
+      const blob = new Blob([JSON.stringify(data, null, 2)], {type:"application/json"});
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = `reviews_${currentSakeId || "unknown"}.json`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+
+    // ---------- render list/sheet ----------
+    function renderList(items){
+      document.getElementById("listCard").style.display = "";
+      document.getElementById("countTag").textContent = `${items.length} bottles`;
+      const list = document.getElementById("list");
+      list.innerHTML = "";
+      items.forEach(it=>{
+        const card = document.createElement("div");
+        card.className = "item";
+        const url = `${location.pathname}?id=${encodeURIComponent(it.id)}`;
+        card.innerHTML = `
+          <div class="n">${escapeHtml(it.name_jp || it.id || "—")}</div>
+          <div class="s">${escapeHtml(it.name_en || "")}</div>
+          <div class="badge">${escapeHtml(it.style_jp || "—")} <span class="muted">/</span> ${escapeHtml(it.style_en || "")}</div>
+          <div class="go">
+            <a class="btn secondary" href="${url}">Open / 開く</a>
+          </div>
+        `;
+        list.appendChild(card);
+      });
+    }
+
+    function renderSheet(it){
+      currentSakeId = it.id;
+      document.getElementById("sheetCard").style.display = "";
+      document.getElementById("sideCard").style.display = "";
+
+      // title
+      document.getElementById("name_jp").textContent = it.name_jp || it.id || "—";
+      document.getElementById("name_en").textContent = it.name_en || "";
+      document.getElementById("idTag").textContent = `id: ${it.id || "—"}`;
+
+      // tags
+      const tags = document.getElementById("tags");
+      tags.innerHTML = "";
+      [it.category_jp, it.category_en, it.region_jp, it.region_en].filter(Boolean).slice(0,4).forEach(t=>{
+        const s = document.createElement("span");
+        s.className = "tag";
+        s.textContent = t;
+        tags.appendChild(s);
+      });
+
+      // KPIs
+      document.getElementById("brewery").textContent =
+        [it.brewery_jp, it.brewery_en].filter(Boolean).join(" / ") || "—";
+      document.getElementById("region").textContent =
+        [it.region_jp, it.region_en].filter(Boolean).join(" / ") || "—";
+
+      document.getElementById("style").textContent =
+        [it.style_jp, it.style_en].filter(Boolean).join(" / ") || "—";
+      document.getElementById("rice").textContent =
+        [it.rice_jp, it.rice_en].filter(Boolean).join(" / ") || "—";
+
+      const abv = it.abv ? `${it.abv}%` : "—";
+      const smv = it.smv ? `SMV ${it.smv}` : "";
+      const acidity = it.acidity_value ? `Acidity ${it.acidity_value}` : "";
+      document.getElementById("spec").textContent = [abv, smv, acidity].filter(Boolean).join(" · ") || "—";
+
+      const polish = it.rice_polish ? `Rice polish ${it.rice_polish}%` : "";
+      document.getElementById("polish").textContent = polish || "—";
+
+      // table
+      document.getElementById("aroma").textContent =
+        [it.aroma_jp, it.aroma_en].filter(Boolean).join(" / ") || "—";
+      document.getElementById("palate").textContent =
+        [it.palate_jp, it.palate_en].filter(Boolean).join(" / ") || "—";
+      document.getElementById("pairing").textContent =
+        [it.pairing_jp, it.pairing_en].filter(Boolean).join(" / ") || "—";
+      document.getElementById("temp").textContent =
+        [it.temp_jp, it.temp_en].filter(Boolean).join(" / ") || "—";
+      document.getElementById("glass").textContent =
+        [it.glass_jp, it.glass_en].filter(Boolean).join(" / ") || "—";
+      document.getElementById("copy").textContent =
+        [it.copy_jp, it.copy_en].filter(Boolean).join(" / ") || "—";
+
+      // Visual bars (0–5)
+      const sweet = setBar("bar_sweet", it.sweet);
+      const aroma = setBar("bar_aroma", it.aroma_intensity);
+      const body  = setBar("bar_body",  it.body);
+      const acid  = setBar("bar_acid",  it.acidity);
+
+      document.getElementById("val_sweet").textContent = sweet.toFixed(0);
+      document.getElementById("val_aroma").textContent = aroma.toFixed(0);
+      document.getElementById("val_body").textContent  = body.toFixed(0);
+      document.getElementById("val_acid").textContent  = acid.toFixed(0);
+
+      document.getElementById("tasteSvgWrap").innerHTML =
+        tasteSvg({sweet, aroma, body, acid});
+
+      // Link actions
+      const url = new URL(location.href);
+      url.searchParams.set("id", it.id);
+      document.getElementById("copyLinkBtn").href = url.toString();
+
+      document.getElementById("copyQrTextBtn").onclick = async () => {
+        try{
+          await navigator.clipboard.writeText(url.toString());
+          statusEl.textContent = "Copied URL ✅ / コピーしました";
+        }catch(e){
+          statusEl.textContent = "Copy failed / コピー失敗";
+        }
+      };
+
+      // ✅ Shared reviews: start listener
+      listenReviewsShared(it.id);
+
+      // Post button
+      document.getElementById("submitReviewBtn").onclick = async () => {
+        const name = document.getElementById("rv_name").value || "Guest";
+        const rating = Number(document.getElementById("rv_rating").value || 5);
+        const msg = document.getElementById("rv_msg").value || "";
+
+        try{
+          await postReviewShared(it.id, { name, rating, msg });
+          document.getElementById("rv_msg").value = "";
+          statusEl.textContent = "Posted ✅ / 投稿しました";
+        } catch (err){
+        console.error(err);
+        // 追加：原因をそのまま表示
+        const code = err?.code ? ` (${err.code})` : "";
+        const msg  = err?.message ? err.message : String(err);
+        statusEl.textContent = `Post failed${code}: ${msg}`;
+        }
+
+      };
+
+      document.getElementById("exportReviewsBtn").onclick = () => {
+        exportReviewsJSON();
+        statusEl.textContent = "Exported ✅ / 書き出しました";
+      };
+    }
+
+    async function main(){
+      try{
+        // Load CSV
+        const res = await fetch(CSV_PATH, { cache: "no-store" });
+        if(!res.ok) throw new Error("CSV fetch failed: " + res.status);
+        const text = await res.text();
+        const items = parseCSV(text);
+
+        statusEl.textContent = `CSV loaded ✅ (${items.length})`;
+
+        // no id => list view
+        if(!targetId){
+          renderList(items);
+          return;
+        }
+
+        // id => per bottle view
+        const it = items.find(x => String(x.id) === String(targetId));
+        if(!it){
+          statusEl.textContent = "Not found / 銘柄IDが見つかりません";
+          renderList(items);
+          return;
+        }
+        renderSheet(it);
+
+      }catch(err){
+        console.error(err);
+        statusEl.textContent = "Load error / 読み込みエラー";
+        document.getElementById("listCard").style.display = "";
+        document.getElementById("list").innerHTML =
+          `<div class="hint">Could not load <span class="muted">${CSV_PATH}</span>. Put it next to index.html. / 同階層にsake.csvを置いてください。</div>
+           <div class="hint muted">※ file:// 直開きだと fetch がブロックされることがあります。Web公開（GitHub Pages等）推奨。</div>`;
+      }
+    }
+
+    main();
+  </script>
+
+  <!--
+  =============================
+  Firestore ルール例（最初はこれでOK）
+  =============================
+  rules_version = '2';
+  service cloud.firestore {
+    match /databases/{database}/documents {
+      match /reviews/{doc} {
+        allow read: if true;
+        allow create: if request.resource.data.msg is string
+                      && request.resource.data.msg.size() <= 240
+                      && request.resource.data.name is string
+                      && request.resource.data.name.size() <= 30
+                      && request.resource.data.rating in [1,2,3,4,5];
+        // 削除/更新は管理者のみ運用にするなら、ここは false のままでOK
+        allow update, delete: if false;
+      }
+    }
+  }
+
+  ※ onSnapshotで "index required" が出たら、Firebase Consoleの案内リンクから
+     (sakeId ASC, ts DESC) の複合インデックスを作成してください（1回だけ）。
+  -->
+</body>
+</html>
