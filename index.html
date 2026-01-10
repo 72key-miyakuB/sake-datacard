@@ -521,6 +521,70 @@
       console.error(e);
     }
 
+    // ---------- Saved list ----------
+    async function loadMySaved(){
+    if (!db) return [];
+    me = me || auth?.currentUser || null;
+    if (!me) return [];
+
+    const snap = await db
+        .collection(USERS_COLLECTION)
+        .doc(me.uid)
+        .collection("saved")
+        .orderBy("savedAt", "desc")
+        .limit(200)
+        .get();
+
+    const out = [];
+    snap.forEach(d => out.push({ id: d.id, ...d.data() }));
+    return out;
+    }
+
+    function renderSavedSection(saved){
+    const listEl = document.getElementById("list");
+    if (!listEl) return;
+
+    const wrap = document.createElement("div");
+    wrap.style.gridColumn = "1 / -1";
+    wrap.style.marginBottom = "10px";
+
+    if (!saved || saved.length === 0){
+        wrap.innerHTML = `
+        <div class="badge">⭐ My Saved / 保存した銘柄</div>
+        <div class="hint muted">まだ保存がありません。個別ページで「Save」を押すとここに出ます。</div>
+        `;
+        listEl.prepend(wrap);
+        return;
+    }
+
+    const cards = saved.map(s=>{
+        const url = `${location.pathname}?id=${encodeURIComponent(s.sakeId || s.id)}`;
+        const jp = escapeHtml(s.name_jp || s.sakeId || s.id || "—");
+        const en = escapeHtml(s.name_en || "");
+        const region = escapeHtml(s.region_jp || "");
+        const style = escapeHtml(s.style_en || "");
+        return `
+        <div class="item">
+            <div class="n">⭐ ${jp}</div>
+            <div class="s">${en}</div>
+            <div class="badge">${style} · <span class="muted">${region}</span></div>
+            <div class="go">
+            <a class="btn secondary" href="${url}">Open / 開く</a>
+            </div>
+        </div>
+        `;
+    }).join("");
+
+    wrap.innerHTML = `
+        <div class="row" style="justify-content:space-between;align-items:center;">
+        <div class="badge">⭐ My Saved / 保存した銘柄</div>
+        <div class="badge muted">${saved.length} items</div>
+        </div>
+        <div class="list" style="margin-top:10px;">${cards}</div>
+    `;
+    listEl.prepend(wrap);
+    }
+
     // ---------- Helpers ----------
     function clamp01(n){ return Math.max(0, Math.min(1, n)); }
     function toNum(v, fallback=0){
@@ -1018,17 +1082,19 @@
         }
       };
 
-      saveBtn.onclick = async () => {
-        try{
-          me = me || await ensureAnonAuth();
-          await saveBottle(it.id, it);
-          statusEl.textContent = "Saved ⭐ / 保存しました";
-          document.getElementById("saveHint").textContent = "⭐ Saved. この銘柄はコレクションに入っています。";
-        }catch(e){
-          console.error(e);
-          statusEl.textContent = "Save failed / 保存失敗";
-        }
-      };
+    saveBtn.onclick = async () => {
+    try{
+        me = me || await ensureAnonAuth();
+        await saveBottle(it.id, it);
+        statusEl.textContent = "Saved ⭐ / 保存しました";
+        document.getElementById("saveHint").textContent = "⭐ Saved. この銘柄はコレクションに入っています。";
+    }catch(e){
+        console.error(e);
+        const code = e?.code ? ` (${e.code})` : "";
+        const msg  = e?.message ? e.message : String(e);
+        statusEl.textContent = `Save failed${code}: ${msg}`;
+    }
+    };
 
       unsaveBtn.onclick = async () => {
         try{
@@ -1106,9 +1172,22 @@
         statusEl.textContent = `CSV loaded ✅ (${items.length})`;
 
         if(!targetId){
-          renderList(items);
-          return;
+        renderList(items);
+
+        // ★ Saved表示：ログインできていれば読み込んで上に表示
+        try{
+            me = await ensureAnonAuth();
+            setMeTag();
+            const saved = await loadMySaved();
+            renderSavedSection(saved);
+        }catch(e){
+            // ここで失敗しても通常の一覧は見せる
+            console.warn("saved load skipped", e);
         }
+
+        return;
+        }
+
 
         const it = items.find(x => String(x.id) === String(targetId));
         if(!it){
