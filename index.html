@@ -489,20 +489,27 @@
     // Firebase init
     let db = null;
     let auth = null;
-    let me = null; // firebase user
+
     try{
-      firebase.initializeApp(firebaseConfig);
-      db = firebase.firestore();
-      auth = firebase.auth();
+    firebase.initializeApp(firebaseConfig);
+    db = firebase.firestore();
+    auth = firebase.auth();   // ← これを追加
     }catch(e){
-      console.error(e);
+    console.error(e);
     }
+
 
     // ---------- Helpers ----------
     function clamp01(n){ return Math.max(0, Math.min(1, n)); }
     function toNum(v, fallback=0){
       const n = Number(String(v).replace(/[^\d.-]/g,""));
       return Number.isFinite(n) ? n : fallback;
+    }
+    async function ensureAnonAuth(){
+    if(!auth) throw new Error("Auth not ready");
+    if(auth.currentUser) return auth.currentUser;
+    const cred = await auth.signInAnonymously();
+    return cred.user;
     }
     function escapeHtml(s){
       return String(s ?? "")
@@ -749,7 +756,14 @@
     let unsubscribeReviews = null;
     let lastReviewsCache = [];
 
-    function listenReviewsShared(sakeId){
+    async function listenReviewsShared(sakeId){
+    try{
+        await ensureAnonAuth();   // ← これを追加
+    }catch(e){
+        console.error(e);
+        statusEl.textContent = "Auth error / 認証エラー";
+        return;
+    }
       if (!db){
         statusEl.textContent = "Firebase init error / Firebase設定を確認";
         renderReviewsShared([]);
@@ -775,6 +789,7 @@
     }
 
     async function postReviewShared(sakeId, {name, rating, msg}){
+      await ensureAnonAuth(); 
       if (!db) throw new Error("Firestore not ready");
       const clean = {
         sakeId: String(sakeId || "").slice(0, 60),
