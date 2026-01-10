@@ -262,7 +262,28 @@
       font-size:12px; color: var(--muted); margin-bottom: 8px;
     }
     .mapwrap{ width:100%; display:flex; justify-content:center; }
-    .mapwrap svg{ width: 100%; max-width: 360px; height:auto; }
+
+    /* ===== Japan SVG map style (県ハイライト) ===== */
+    .mapwrap svg{
+      width:100%;
+      max-width: 360px;
+      height:auto;
+      display:block;
+    }
+    /* 都道府県の“塗り対象”に付けるクラス（polygon/path等） */
+    .pref{
+      fill: rgba(255,255,255,.06);
+      stroke: rgba(255,255,255,.18);
+      stroke-width: 1;
+      transition: .18s ease;
+    }
+    .pref.dim{ opacity: .40; }
+    .pref.active{
+      fill: rgba(215,181,109,.78);
+      stroke: rgba(215,181,109,.98);
+      filter: drop-shadow(0 0 10px rgba(215,181,109,.45));
+      opacity: 1;
+    }
   </style>
 </head>
 
@@ -358,7 +379,7 @@
                 <span class="muted" id="mapMeta">—</span>
               </div>
               <div class="mapwrap" id="mapWrap"></div>
-              <div class="hint muted">※ 都道府県は概算座標でピン表示（MVP）。</div>
+              <div class="hint muted">※ 都道府県をハイライト（SVG）。壊れにくくインバウンド向き。</div>
             </div>
 
             <!-- Bars -->
@@ -451,7 +472,7 @@
         </div>
         <div class="body">
           <div class="list" id="list"></div>
-          <div class="hint muted">※ QRは「GitHub Pages側が生成」。このページは id パラメータで個別表示します。</div>
+          <div class="hint muted">※ このページは <span class="muted">?id=xxxx</span> で個別表示します。</div>
         </div>
       </section>
     </main>
@@ -464,7 +485,7 @@
 
   <script>
     // =========================
-    // 1) Firebase設定（要差し替え）
+    // Firebase設定（要差し替え）
     // =========================
     const firebaseConfig = {
       apiKey: "AIzaSyD1sbz6sLUMf6tabsjwvteEOoQB6vFlcZU",
@@ -473,9 +494,10 @@
     };
 
     // =========================
-    // 2) App settings
+    // App settings
     // =========================
     const CSV_PATH = "./sake.csv";
+    const JAPAN_SVG_PATH = "./assets/japan_pref.svg";
     const REVIEWS_COLLECTION = "reviews";
     const USERS_COLLECTION   = "users";
     const REVIEW_LIMIT = 60;
@@ -489,27 +511,21 @@
     // Firebase init
     let db = null;
     let auth = null;
+    let me = null;
 
     try{
-    firebase.initializeApp(firebaseConfig);
-    db = firebase.firestore();
-    auth = firebase.auth();   // ← これを追加
+      firebase.initializeApp(firebaseConfig);
+      db = firebase.firestore();
+      auth = firebase.auth();
     }catch(e){
-    console.error(e);
+      console.error(e);
     }
-
 
     // ---------- Helpers ----------
     function clamp01(n){ return Math.max(0, Math.min(1, n)); }
     function toNum(v, fallback=0){
       const n = Number(String(v).replace(/[^\d.-]/g,""));
       return Number.isFinite(n) ? n : fallback;
-    }
-    async function ensureAnonAuth(){
-    if(!auth) throw new Error("Auth not ready");
-    if(auth.currentUser) return auth.currentUser;
-    const cred = await auth.signInAnonymously();
-    return cred.user;
     }
     function escapeHtml(s){
       return String(s ?? "")
@@ -535,6 +551,20 @@
         if (s) return s;
       }
       return "";
+    }
+
+    // ---------- Auth (Anonymous) ----------
+    async function ensureAnonAuth(){
+      if(!auth) throw new Error("Auth not ready");
+      if(auth.currentUser) return auth.currentUser;
+      const cred = await auth.signInAnonymously();
+      return cred.user;
+    }
+    function setMeTag(){
+      const el = document.getElementById("meTag");
+      if (!el) return;
+      if (!me) { el.textContent = "me: —"; return; }
+      el.textContent = `me: ${me.isAnonymous ? "guest" : "user"} · ${String(me.uid).slice(0,6)}`;
     }
 
     // ---------- CSV parsing ----------
@@ -565,12 +595,12 @@
         });
     }
 
-    // ---------- visuals ----------
+    // ---------- Taste visuals ----------
     function setBar(elId, value0to5){
       const v = Math.max(0, Math.min(5, toNum(value0to5, 0)));
       const pct = (v/5)*100;
       const el = document.getElementById(elId);
-      el.style.width = pct + "%";
+      if (el) el.style.width = pct + "%";
       return v;
     }
 
@@ -609,75 +639,125 @@
       `;
     }
 
-    // ---------- Map (MVP) ----------
-    // Prefecture centroid-ish points (rough). If unknown, no pin.
-    const PREF_POINTS = {
-      "北海道":[86,18], "青森県":[80,44], "岩手県":[84,48], "宮城県":[86,54], "秋田県":[78,50], "山形県":[80,56], "福島県":[84,60],
-      "新潟県":[72,64], "栃木県":[86,66], "群馬県":[80,68], "茨城県":[92,68], "埼玉県":[82,72], "千葉県":[92,74], "東京都":[86,74], "神奈川県":[84,78],
-      "山梨県":[78,74], "長野県":[72,70], "静岡県":[78,82], "愛知県":[70,82], "岐阜県":[66,78], "三重県":[64,86],
-      "富山県":[60,70], "石川県":[56,70], "福井県":[56,76], "滋賀県":[62,80], "京都府":[60,82], "大阪府":[60,86], "兵庫県":[54,84], "奈良県":[64,88], "和歌山県":[58,92],
-      "鳥取県":[46,82], "島根県":[40,82], "岡山県":[46,86], "広島県":[40,86], "山口県":[34,86],
-      "香川県":[44,92], "徳島県":[48,96], "愛媛県":[38,94], "高知県":[44,98],
-      "福岡県":[30,92], "佐賀県":[26,92], "長崎県":[22,94], "熊本県":[28,98], "大分県":[36,98], "宮崎県":[30,104], "鹿児島県":[26,110],
-      "沖縄県":[10,120]
-    };
-
+    // ---------- Japan SVG Map (Geolonia prefecture svg 対応) ----------
     function prefectureFromRegionJP(regionJP){
       const s = String(regionJP||"").trim();
-      // e.g. "奈良県 / Nara" or "奈良県" を想定
-      const m = s.match(/(北海道|..県|..府|東京都)/);
+      const m = s.match(/(北海道|東京都|..府|..県)/);
       return m ? m[1] : "";
     }
 
-    function typeColor(typeText){
-      const t = String(typeText||"").toLowerCase();
-      if (t.includes("dry")) return "rgba(110,170,255,.95)";
-      if (t.includes("fruity")) return "rgba(255,160,190,.95)";
-      if (t.includes("rich")) return "rgba(215,181,109,.95)";
-      if (t.includes("light")) return "rgba(126,227,166,.95)";
-      return "rgba(215,181,109,.95)";
+    const PREF_JP_TO_CLASS = {
+      "北海道":"hokkaido","青森県":"aomori","岩手県":"iwate","宮城県":"miyagi","秋田県":"akita","山形県":"yamagata","福島県":"fukushima",
+      "茨城県":"ibaraki","栃木県":"tochigi","群馬県":"gunma","埼玉県":"saitama","千葉県":"chiba","東京都":"tokyo","神奈川県":"kanagawa",
+      "新潟県":"niigata","富山県":"toyama","石川県":"ishikawa","福井県":"fukui","山梨県":"yamanashi","長野県":"nagano",
+      "岐阜県":"gifu","静岡県":"shizuoka","愛知県":"aichi","三重県":"mie","滋賀県":"shiga","京都府":"kyoto","大阪府":"osaka",
+      "兵庫県":"hyogo","奈良県":"nara","和歌山県":"wakayama",
+      "鳥取県":"tottori","島根県":"shimane","岡山県":"okayama","広島県":"hiroshima","山口県":"yamaguchi",
+      "徳島県":"tokushima","香川県":"kagawa","愛媛県":"ehime","高知県":"kochi",
+      "福岡県":"fukuoka","佐賀県":"saga","長崎県":"nagasaki","熊本県":"kumamoto","大分県":"oita","宮崎県":"miyazaki",
+      "鹿児島県":"kagoshima","沖縄県":"okinawa",
+    };
+
+    let japanSvgEl = null;
+
+    function getPrefGroups(svg){
+      return Array.from(svg.querySelectorAll("g.prefecture"));
     }
 
-    function japanMapSvg(pref, label, pinColor){
-      const W=220, H=140;
-      const p = PREF_POINTS[pref];
-      const pin = p ? `<circle cx="${p[0]}" cy="${p[1]}" r="4.2" fill="${pinColor}" stroke="rgba(255,255,255,.75)" stroke-width="1.2"/>
-                       <circle cx="${p[0]}" cy="${p[1]}" r="10" fill="${pinColor}" opacity=".12"/>` : "";
-      const cap = escapeHtml(label || (pref ? pref : "—"));
-      return `
-        <svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Japan map">
-          <rect x="0" y="0" width="${W}" height="${H}" rx="14" ry="14" fill="rgba(0,0,0,.14)" stroke="rgba(255,255,255,.10)"/>
-          <!-- super simplified archipelago blobs -->
-          <path d="M70 35 C85 30, 96 40, 92 52 C88 64, 76 66, 68 58 C62 52, 60 40, 70 35Z"
-                fill="rgba(255,255,255,.08)" stroke="rgba(255,255,255,.12)"/>
-          <path d="M60 60 C76 52, 92 64, 86 78 C80 92, 66 98, 56 88 C48 80, 48 68, 60 60Z"
-                fill="rgba(255,255,255,.07)" stroke="rgba(255,255,255,.12)"/>
-          <path d="M40 78 C56 72, 66 84, 58 98 C50 112, 36 112, 30 98 C26 88, 30 82, 40 78Z"
-                fill="rgba(255,255,255,.07)" stroke="rgba(255,255,255,.12)"/>
-          <path d="M20 104 C30 100, 36 110, 28 122 C20 134, 8 126, 10 114 C12 108, 14 106, 20 104Z"
-                fill="rgba(255,255,255,.06)" stroke="rgba(255,255,255,.12)"/>
-          ${pin}
-          <text x="12" y="20" font-size="11" fill="rgba(255,255,255,.72)">Japan</text>
-          <text x="12" y="${H-12}" font-size="11" fill="rgba(255,255,255,.78)">${cap}</text>
-        </svg>
-      `;
+    function markPrefShapes(svg){
+      // Geolonia の都道府県は g.prefecture の中に polygon/path が入っているので、それらを塗り対象にする
+      const groups = getPrefGroups(svg);
+      groups.forEach(g=>{
+        // title から日本語県名を取って data-jp に保持しておく（例: "奈良 / Nara" → "奈良"）
+        const title = g.querySelector("title")?.textContent || "";
+        const jpName = title.split("/")[0].trim(); // "奈良"
+        if (jpName) g.dataset.jp = jpName;
+
+        g.querySelectorAll("path, polygon").forEach(shape=>{
+          shape.classList.add("pref");
+        });
+      });
     }
 
-    // ---------- Auth + Collection ----------
-    function setMeTag(){
-      const el = document.getElementById("meTag");
-      if (!el) return;
-      if (!me) { el.textContent = "me: —"; return; }
-      el.textContent = `me: ${me.isAnonymous ? "guest" : "user"} · ${String(me.uid).slice(0,6)}`;
+    async function loadJapanMapSvg(){
+      const res = await fetch(JAPAN_SVG_PATH, { cache: "no-store" });
+      if(!res.ok) throw new Error("SVG fetch failed: " + res.status);
+      const svgText = await res.text();
+
+      const wrap = document.getElementById("mapWrap");
+      wrap.innerHTML = svgText;
+
+      const svg = wrap.querySelector("svg");
+      if(!svg) throw new Error("SVG not found inside mapWrap");
+
+      markPrefShapes(svg);
+
+      japanSvgEl = svg;
+      return svg;
     }
 
-    async function ensureSignedIn(){
-      if (!auth) throw new Error("Auth not ready");
-      if (auth.currentUser) return auth.currentUser;
-      const res = await auth.signInAnonymously();
-      return res.user;
+    function findPrefGroup(svg, prefJpWithSuffix){
+      if(!svg || !prefJpWithSuffix) return null;
+
+      // 例: "奈良県" → "奈良"
+      const prefShort = prefJpWithSuffix
+        .replace("都","")
+        .replace("道","")
+        .replace("府","")
+        .replace("県","");
+
+      // 1) class で探す（Geoloniaは g.prefecture が "nara" みたいなクラスを持つ）
+      const cls = PREF_JP_TO_CLASS[prefJpWithSuffix];
+      if (cls){
+        const byClass = svg.querySelector(`g.prefecture.${CSS.escape(cls)}`);
+        if (byClass) return byClass;
+      }
+
+      // 2) title / data-jp で探す（例: <title>奈良 / Nara</title>）
+      const groups = getPrefGroups(svg);
+      for(const g of groups){
+        const jp = (g.dataset.jp || "").trim();
+        if (jp === prefShort) return g;
+        const title = g.querySelector("title")?.textContent || "";
+        if (title.includes(prefShort)) return g;
+      }
+
+      // 3) data-code で探したい場合はここに追加（必要なら）
+      return null;
     }
 
+    function highlightPrefOnMap(prefJp){
+      const meta = document.getElementById("mapMeta");
+      if(meta) meta.textContent = prefJp || "—";
+
+      if(!japanSvgEl) return;
+      const svg = japanSvgEl;
+
+      // reset（全部の塗り対象を戻す）
+      svg.querySelectorAll(".pref").forEach(el=>{
+        el.classList.remove("active");
+        el.classList.remove("dim");
+      });
+
+      if(!prefJp) return;
+
+      const group = findPrefGroup(svg, prefJp);
+      if(!group){
+        // ステータスは壊さない（地図だけ注意）
+        console.warn("Map: prefecture not matched:", prefJp);
+        return;
+      }
+
+      // まず全部 dim、次に対象だけ active
+      svg.querySelectorAll(".pref").forEach(el=> el.classList.add("dim"));
+
+      group.querySelectorAll("path.pref, polygon.pref").forEach(shape=>{
+        shape.classList.remove("dim");
+        shape.classList.add("active");
+      });
+    }
+
+    // ---------- Collection (Save/Unsave) ----------
     async function saveBottle(sakeId, bottleMeta){
       if (!db) throw new Error("Firestore not ready");
       if (!me) throw new Error("Not signed in");
@@ -757,13 +837,15 @@
     let lastReviewsCache = [];
 
     async function listenReviewsShared(sakeId){
-    try{
-        await ensureAnonAuth();   // ← これを追加
-    }catch(e){
+      try{
+        me = await ensureAnonAuth();
+        setMeTag();
+      }catch(e){
         console.error(e);
-        statusEl.textContent = "Auth error / 認証エラー";
+        statusEl.textContent = "Auth error / 認証エラー（Anonymous有効化を確認）";
         return;
-    }
+      }
+
       if (!db){
         statusEl.textContent = "Firebase init error / Firebase設定を確認";
         renderReviewsShared([]);
@@ -789,15 +871,16 @@
     }
 
     async function postReviewShared(sakeId, {name, rating, msg}){
-      await ensureAnonAuth(); 
+      me = me || await ensureAnonAuth();
       if (!db) throw new Error("Firestore not ready");
+
       const clean = {
         sakeId: String(sakeId || "").slice(0, 60),
         name: String(name || "Guest").trim().slice(0, 30),
         rating: Math.max(1, Math.min(5, Number(rating)||5)),
         msg: String(msg || "").trim().slice(0, 240),
         ts: firebase.firestore.FieldValue.serverTimestamp(),
-        uid: me?.uid ? String(me.uid).slice(0, 80) : "anon",
+        uid: String(me?.uid || "anon").slice(0, 80),
       };
       if (!clean.msg) throw new Error("Empty message");
       await db.collection(REVIEWS_COLLECTION).add(clean);
@@ -827,7 +910,6 @@
       const en = `${region} · ${brewery}. A ${style} sake${rice ? ` using ${rice}` : ""}. ${aroma ? `Aroma: ${aroma}.` : ""} ${palate ? `Palate: ${palate}.` : ""}`.replace(/\s+/g," ").trim();
       const jp = `${pick(it.region_jp,it.region_en)}の${pick(it.brewery_jp,it.brewery_en)}。${pick(it.style_jp,it.style_en)}${it.rice_jp ? `（${it.rice_jp}）` : ""}の魅力。${it.aroma_jp ? `香り：${it.aroma_jp}。` : ""}${it.palate_jp ? `味わい：${it.palate_jp}。` : ""}`.replace(/\s+/g," ").trim();
 
-      // 2 lines-ish
       return jpOrEn(jp, en);
     }
 
@@ -916,13 +998,9 @@
 
       document.getElementById("tasteSvgWrap").innerHTML = tasteSvg({sweet, aroma, body, acid});
 
-      // Map
+      // ✅ Map highlight（SVG）
       const pref = prefectureFromRegionJP(it.region_jp || "");
-      const label = pick(it.region_en, it.region_jp, "—");
-      const t = pick(it["分類タイプ"], it.style_en, it.style_jp, "");
-      const pinColor = typeColor(t);
-      document.getElementById("mapMeta").textContent = pref ? `${pref}` : "—";
-      document.getElementById("mapWrap").innerHTML = japanMapSvg(pref, label, pinColor);
+      highlightPrefOnMap(pref);
 
       // Auth / Save UI
       const authBtn = document.getElementById("authBtn");
@@ -931,20 +1009,21 @@
 
       authBtn.onclick = async () => {
         try{
-          me = await ensureSignedIn();
+          me = await ensureAnonAuth();
           setMeTag();
           statusEl.textContent = "Ready ✅ / 記録できます";
         }catch(e){
           console.error(e);
-          statusEl.textContent = "Auth error / 認証エラー";
+          statusEl.textContent = "Auth error / 認証エラー（Anonymous有効化を確認）";
         }
       };
 
       saveBtn.onclick = async () => {
         try{
-          me = me || await ensureSignedIn();
+          me = me || await ensureAnonAuth();
           await saveBottle(it.id, it);
           statusEl.textContent = "Saved ⭐ / 保存しました";
+          document.getElementById("saveHint").textContent = "⭐ Saved. この銘柄はコレクションに入っています。";
         }catch(e){
           console.error(e);
           statusEl.textContent = "Save failed / 保存失敗";
@@ -953,9 +1032,10 @@
 
       unsaveBtn.onclick = async () => {
         try{
-          if (!me) me = await ensureSignedIn();
+          me = me || await ensureAnonAuth();
           await unsaveBottle(it.id);
           statusEl.textContent = "Removed / 解除しました";
+          document.getElementById("saveHint").textContent = "Tip: Save すると“旅のコレクション”に残せます。";
         }catch(e){
           console.error(e);
           statusEl.textContent = "Remove failed / 解除失敗";
@@ -971,7 +1051,7 @@
         const rating = Number(document.getElementById("rv_rating").value || 5);
         const msg = document.getElementById("rv_msg").value || "";
         try{
-          me = me || await ensureSignedIn(); // ensure uid exists
+          me = me || await ensureAnonAuth();
           await postReviewShared(it.id, { name, rating, msg });
           document.getElementById("rv_msg").value = "";
           statusEl.textContent = "Posted ✅ / 投稿しました";
@@ -988,9 +1068,9 @@
         statusEl.textContent = "Exported ✅ / 書き出しました";
       };
 
-      // show save state (optional)
+      // show save state
       try{
-        me = auth?.currentUser || me;
+        if (auth?.currentUser) me = auth.currentUser;
         if (me && it.id){
           const saved = await isSavedBottle(it.id);
           document.getElementById("saveHint").textContent = saved
@@ -1002,7 +1082,6 @@
 
     async function main(){
       try{
-        // auth state
         if (auth){
           auth.onAuthStateChanged(u => {
             me = u || null;
@@ -1010,6 +1089,15 @@
           });
         }
 
+        // load map svg early
+        try{
+          await loadJapanMapSvg();
+        }catch(e){
+          console.error(e);
+          statusEl.textContent = "Map load error / japan_pref.svg を確認";
+        }
+
+        // load CSV
         const res = await fetch(CSV_PATH, { cache: "no-store" });
         if(!res.ok) throw new Error("CSV fetch failed: " + res.status);
         const text = await res.text();
@@ -1028,6 +1116,7 @@
           renderList(items);
           return;
         }
+
         await renderSheet(it);
 
       }catch(err){
