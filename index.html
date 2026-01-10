@@ -348,6 +348,7 @@
             <button class="secondary" id="authBtn" type="button">👤 Start saving / 記録を始める</button>
             <button id="saveBtn" type="button">⭐ Save / 保存</button>
             <button class="secondary" id="unsaveBtn" type="button">✦ Unsave / 解除</button>
+            <a class="btn secondary" id="savedListBtn" href="./index.html">⭐ My Saved / 保存一覧</a>
           </div>
           <div class="hint" id="saveHint">Tip: 端末にひもづく「旅のコレクション」を作れます。</div>
         </div>
@@ -1108,6 +1109,19 @@
         }
       };
 
+    // ✅ Saved一覧へ（個別ページから）
+    const savedListBtn = document.getElementById("savedListBtn");
+    if (savedListBtn){
+    savedListBtn.onclick = async (e) => {
+        e.preventDefault();
+        try{
+        me = me || await ensureAnonAuth(); // 先に匿名UIDを確定
+        setMeTag();
+        }catch(_){}
+        location.href = "./index.html"; // ?id無しへ
+    };
+    }
+    
       // Reviews: start listener
       listenReviewsShared(it.id);
 
