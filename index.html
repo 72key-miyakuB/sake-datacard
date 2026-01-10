@@ -80,7 +80,7 @@
       white-space: nowrap;
     }
     .body{ padding: 14px; }
-    .row{ display:flex; gap:10px; flex-wrap:wrap; }
+    .row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
     .kpi{
       flex:1; min-width: 170px;
       padding: 10px 12px;
@@ -115,7 +115,7 @@
       border-radius: 14px;
       background: rgba(255,255,255,.03);
     }
-    .bar .label{ width: 92px; font-size: 12px; color: var(--muted); }
+    .bar .label{ width: 108px; font-size: 12px; color: var(--muted); }
     .track{
       flex:1; height: 8px;
       border-radius: 999px;
@@ -186,6 +186,7 @@
     .story .h{ font-size: 11px; color: var(--muted); margin-bottom: 6px; display:flex; justify-content:space-between; gap:10px; }
     .story .p{ font-size: 13px; }
 
+    /* Reviews */
     .reviews{ display:flex; flex-direction:column; gap:10px; margin-top: 12px; }
     .review{
       border: 1px solid var(--line);
@@ -231,6 +232,7 @@
       background: rgba(255,255,255,.02);
     }
 
+    /* List */
     .list{
       display:grid;
       grid-template-columns: repeat(2, minmax(0,1fr));
@@ -270,7 +272,6 @@
       height:auto;
       display:block;
     }
-    /* 都道府県の“塗り対象”に付けるクラス（polygon/path等） */
     .pref{
       fill: rgba(255,255,255,.06);
       stroke: rgba(255,255,255,.18);
@@ -283,6 +284,35 @@
       stroke: rgba(215,181,109,.98);
       filter: drop-shadow(0 0 10px rgba(215,181,109,.45));
       opacity: 1;
+    }
+
+    /* --- Review header (make it standout) --- */
+    .reviewHead{
+      border: 1px solid rgba(215,181,109,.35);
+      background: rgba(215,181,109,.08);
+      border-radius: 16px;
+      padding: 12px 12px;
+    }
+    .reviewHead .h1{
+      font-size: 16px;
+      font-weight: 900;
+      letter-spacing: .2px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin:0 0 6px;
+    }
+    .reviewHead .desc{
+      font-size: 12px;
+      color: var(--muted);
+      margin:0;
+      line-height: 1.6;
+    }
+    .hr{
+      height:1px;
+      background: rgba(255,255,255,.10);
+      margin: 10px 0;
     }
   </style>
 </head>
@@ -345,12 +375,9 @@
           </div>
 
           <div class="actions">
-            <button class="secondary" id="authBtn" type="button">👤 Start saving / 記録を始める</button>
-            <button id="saveBtn" type="button">⭐ Save / 保存</button>
-            <button class="secondary" id="unsaveBtn" type="button">✦ Unsave / 解除</button>
-            <a class="btn secondary" id="savedListBtn" href="./index.html">⭐ My Saved / 保存一覧</a>
+            <a class="btn secondary" id="myPageBtn" href="./index.html">⭐ My Page / 履歴を見る</a>
           </div>
-          <div class="hint" id="saveHint">Tip: 端末にひもづく「旅のコレクション」を作れます。</div>
+          <div class="hint" id="myPageHint">※ レビュー投稿時に登録した名前で、次のQRでも続きから書けます。</div>
         </div>
 
         <div class="footnote">
@@ -359,12 +386,12 @@
         </div>
       </section>
 
-      <!-- Right: Visuals + Reviews -->
+      <!-- Right: Map + Taste + Reviews -->
       <aside class="card" id="sideCard" style="display:none;">
         <div class="hd">
           <div class="title">
-            <div class="jp">ビジュアル / Visual</div>
-            <div class="en">Map + taste compass + reviews</div>
+            <div class="jp">テイスティング / Tasting</div>
+            <div class="en">Origin map + taste guide + reviews</div>
           </div>
           <div class="tags">
             <span class="tag" id="idTag">id: —</span>
@@ -376,11 +403,11 @@
             <!-- Map -->
             <div class="mapbox">
               <div class="caption">
-                <span>🗾 Origin / 産地マップ</span>
+                <span>🗾 Origin / 産地</span>
                 <span class="muted" id="mapMeta">—</span>
               </div>
               <div class="mapwrap" id="mapWrap"></div>
-              <div class="hint muted">※ 都道府県をハイライト（SVG）。壊れにくくインバウンド向き。</div>
+              <div class="hint muted">※ 県をハイライト表示（壊れにくいSVG）</div>
             </div>
 
             <!-- Bars -->
@@ -416,42 +443,46 @@
             </div>
 
             <!-- Reviews -->
-            <div>
-              <div class="row" style="justify-content:space-between; align-items:center;">
-                <div class="badge">🗒 Reviews / レビュー</div>
-                <div class="badge" id="ratingBadge">—</div>
+            <div class="reviewHead">
+              <div class="h1">
+                <span>✍️ Reviews / 感想を書く・読む</span>
+                <span class="badge" id="ratingBadge">—</span>
               </div>
+              <p class="desc">
+                初回は「お名前」を入れて投稿すると、その名前がこの端末に保存されます（面倒な会員登録なし）。<br/>
+                次に別のQRを読んでも同じ名前で続けて投稿できます。投稿したレビューは店内の全員に表示されます。
+              </p>
+            </div>
 
-              <div class="reviews" id="reviews"></div>
+            <div class="reviews" id="reviews"></div>
 
-              <div class="form" aria-label="Review form">
-                <div class="formgrid">
-                  <div>
-                    <div class="muted" style="font-size:12px; margin:0 0 6px;">Name / お名前</div>
-                    <input id="rv_name" placeholder="e.g. Alex / アレックス" maxlength="30" />
-                  </div>
-                  <div>
-                    <div class="muted" style="font-size:12px; margin:0 0 6px;">Rating / 評価</div>
-                    <select id="rv_rating">
-                      <option value="5">★★★★★ (5)</option>
-                      <option value="4">★★★★☆ (4)</option>
-                      <option value="3">★★★☆☆ (3)</option>
-                      <option value="2">★★☆☆☆ (2)</option>
-                      <option value="1">★☆☆☆☆ (1)</option>
-                    </select>
-                  </div>
+            <div class="form" aria-label="Review form">
+              <div class="formgrid">
+                <div>
+                  <div class="muted" style="font-size:12px; margin:0 0 6px;">Name / お名前（初回のみ）</div>
+                  <input id="rv_name" placeholder="e.g. Alex / アレックス" maxlength="30" />
                 </div>
-                <div style="margin-top:10px;">
-                  <div class="muted" style="font-size:12px; margin:0 0 6px;">Comment / コメント</div>
-                  <textarea id="rv_msg" placeholder="Short impressions / ひとこと感想（短め推奨）" maxlength="240"></textarea>
+                <div>
+                  <div class="muted" style="font-size:12px; margin:0 0 6px;">Rating / 評価</div>
+                  <select id="rv_rating">
+                    <option value="5">★★★★★ (5)</option>
+                    <option value="4">★★★★☆ (4)</option>
+                    <option value="3">★★★☆☆ (3)</option>
+                    <option value="2">★★☆☆☆ (2)</option>
+                    <option value="1">★☆☆☆☆ (1)</option>
+                  </select>
                 </div>
-                <div class="actions" style="margin-top:10px;">
-                  <button id="submitReviewBtn" type="button">✍️ Post / 投稿</button>
-                  <button class="secondary" id="exportReviewsBtn" type="button">⬇️ Export JSON</button>
-                </div>
-                <div class="hint muted">
-                  ※ Save は端末にひもづく匿名アカウントでOK（複雑な登録なし）。
-                </div>
+              </div>
+              <div style="margin-top:10px;">
+                <div class="muted" style="font-size:12px; margin:0 0 6px;">Comment / コメント</div>
+                <textarea id="rv_msg" placeholder="Short impressions / ひとこと感想（短め推奨）" maxlength="240"></textarea>
+              </div>
+              <div class="actions" style="margin-top:10px;">
+                <button id="submitReviewBtn" type="button">投稿する / Post</button>
+                <button class="secondary" id="exportReviewsBtn" type="button">⬇️ Export JSON</button>
+              </div>
+              <div class="hint muted">
+                ※ 投稿後、この銘柄は「My Page（履歴）」に自動で追加されます。
               </div>
             </div>
 
@@ -459,12 +490,12 @@
         </div>
       </aside>
 
-      <!-- List view -->
+      <!-- My Page (when no ?id) -->
       <section class="card" id="listCard" style="display:none; grid-column: 1 / -1;">
         <div class="hd">
           <div class="title">
-            <div class="jp">銘柄一覧 / Sake List</div>
-            <div class="en">Tap a bottle to open its page.</div>
+            <div class="jp">My Page / 履歴</div>
+            <div class="en">Your reviewed bottles on this device.</div>
           </div>
           <div class="tags">
             <span class="tag" id="countTag">—</span>
@@ -472,8 +503,30 @@
           </div>
         </div>
         <div class="body">
-          <div class="list" id="list"></div>
-          <div class="hint muted">※ このページは <span class="muted">?id=xxxx</span> で個別表示します。</div>
+          <div class="reviewHead" style="margin-bottom:12px;">
+            <div class="h1" style="margin-bottom:6px;">
+              <span>⭐ 履歴の見方 / How it works</span>
+              <span class="badge muted" id="myNameBadge">name: —</span>
+            </div>
+            <p class="desc">
+              ここには「この端末でレビュー投稿した銘柄」が自動で溜まります。<br/>
+              QRで個別ページに行き、レビューを投稿すると履歴に追加されます（端末ごとに保存）。
+            </p>
+            <div class="actions" style="margin-top:10px;">
+              <button class="secondary" id="changeNameBtn" type="button">名前を変更 / Change name</button>
+            </div>
+            <div class="hint muted">※ 名前を変えると次回以降の投稿名が変わります（過去レビューの表示名は変わりません）。</div>
+          </div>
+
+          <div class="badge">✍️ My Reviews / レビューした銘柄</div>
+          <div class="list" id="myReviewedList" style="margin-top:10px;"></div>
+
+          <div class="hr"></div>
+
+          <div class="badge muted">🔎 All bottles / 全銘柄（スタッフ用）</div>
+          <div class="list" id="list" style="margin-top:10px;"></div>
+
+          <div class="hint muted">※ 個別ページは <span class="muted">?id=xxxx</span> で開きます。</div>
         </div>
       </section>
     </main>
@@ -522,70 +575,6 @@
       console.error(e);
     }
 
-    // ---------- Saved list ----------
-    async function loadMySaved(){
-    if (!db) return [];
-    me = me || auth?.currentUser || null;
-    if (!me) return [];
-
-    const snap = await db
-        .collection(USERS_COLLECTION)
-        .doc(me.uid)
-        .collection("saved")
-        .orderBy("savedAt", "desc")
-        .limit(200)
-        .get();
-
-    const out = [];
-    snap.forEach(d => out.push({ id: d.id, ...d.data() }));
-    return out;
-    }
-
-    function renderSavedSection(saved){
-    const listEl = document.getElementById("list");
-    if (!listEl) return;
-
-    const wrap = document.createElement("div");
-    wrap.style.gridColumn = "1 / -1";
-    wrap.style.marginBottom = "10px";
-
-    if (!saved || saved.length === 0){
-        wrap.innerHTML = `
-        <div class="badge">⭐ My Saved / 保存した銘柄</div>
-        <div class="hint muted">まだ保存がありません。個別ページで「Save」を押すとここに出ます。</div>
-        `;
-        listEl.prepend(wrap);
-        return;
-    }
-
-    const cards = saved.map(s=>{
-        const url = `${location.pathname}?id=${encodeURIComponent(s.sakeId || s.id)}`;
-        const jp = escapeHtml(s.name_jp || s.sakeId || s.id || "—");
-        const en = escapeHtml(s.name_en || "");
-        const region = escapeHtml(s.region_jp || "");
-        const style = escapeHtml(s.style_en || "");
-        return `
-        <div class="item">
-            <div class="n">⭐ ${jp}</div>
-            <div class="s">${en}</div>
-            <div class="badge">${style} · <span class="muted">${region}</span></div>
-            <div class="go">
-            <a class="btn secondary" href="${url}">Open / 開く</a>
-            </div>
-        </div>
-        `;
-    }).join("");
-
-    wrap.innerHTML = `
-        <div class="row" style="justify-content:space-between;align-items:center;">
-        <div class="badge">⭐ My Saved / 保存した銘柄</div>
-        <div class="badge muted">${saved.length} items</div>
-        </div>
-        <div class="list" style="margin-top:10px;">${cards}</div>
-    `;
-    listEl.prepend(wrap);
-    }
-
     // ---------- Helpers ----------
     function clamp01(n){ return Math.max(0, Math.min(1, n)); }
     function toNum(v, fallback=0){
@@ -618,18 +607,59 @@
       return "";
     }
 
-    // ---------- Auth (Anonymous) ----------
+    // ---------- Auth (Anonymous) + displayName ----------
+    const LS_NAME_KEY = "tsc_displayName";
+
     async function ensureAnonAuth(){
       if(!auth) throw new Error("Auth not ready");
       if(auth.currentUser) return auth.currentUser;
       const cred = await auth.signInAnonymously();
       return cred.user;
     }
+
     function setMeTag(){
       const el = document.getElementById("meTag");
       if (!el) return;
       if (!me) { el.textContent = "me: —"; return; }
       el.textContent = `me: ${me.isAnonymous ? "guest" : "user"} · ${String(me.uid).slice(0,6)}`;
+    }
+
+    async function loadMyProfile(){
+      if (!db || !me) return { displayName: localStorage.getItem(LS_NAME_KEY) || "" };
+
+      try{
+        const ref = db.collection(USERS_COLLECTION).doc(me.uid);
+        const snap = await ref.get();
+        const dn = snap.exists ? (snap.data()?.displayName || "") : "";
+        const local = localStorage.getItem(LS_NAME_KEY) || "";
+        const displayName = dn || local || "";
+        if (displayName) localStorage.setItem(LS_NAME_KEY, displayName);
+        return { displayName };
+      }catch(e){
+        console.error(e);
+        return { displayName: localStorage.getItem(LS_NAME_KEY) || "" };
+      }
+    }
+
+    async function saveMyDisplayName(name){
+      const displayName = String(name||"").trim().slice(0,30);
+      if (!displayName) throw new Error("Empty displayName");
+
+      localStorage.setItem(LS_NAME_KEY, displayName);
+
+      if (db && me){
+        await db.collection(USERS_COLLECTION).doc(me.uid).set({
+          displayName,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge:true });
+      }
+      return displayName;
+    }
+
+    function setMyNameBadge(name){
+      const b = document.getElementById("myNameBadge");
+      if (!b) return;
+      b.textContent = `name: ${name ? escapeHtml(name) : "—"}`;
     }
 
     // ---------- CSV parsing ----------
@@ -730,12 +760,10 @@
     }
 
     function markPrefShapes(svg){
-      // Geolonia の都道府県は g.prefecture の中に polygon/path が入っているので、それらを塗り対象にする
       const groups = getPrefGroups(svg);
       groups.forEach(g=>{
-        // title から日本語県名を取って data-jp に保持しておく（例: "奈良 / Nara" → "奈良"）
         const title = g.querySelector("title")?.textContent || "";
-        const jpName = title.split("/")[0].trim(); // "奈良"
+        const jpName = title.split("/")[0].trim();
         if (jpName) g.dataset.jp = jpName;
 
         g.querySelectorAll("path, polygon").forEach(shape=>{
@@ -764,21 +792,18 @@
     function findPrefGroup(svg, prefJpWithSuffix){
       if(!svg || !prefJpWithSuffix) return null;
 
-      // 例: "奈良県" → "奈良"
       const prefShort = prefJpWithSuffix
         .replace("都","")
         .replace("道","")
         .replace("府","")
         .replace("県","");
 
-      // 1) class で探す（Geoloniaは g.prefecture が "nara" みたいなクラスを持つ）
       const cls = PREF_JP_TO_CLASS[prefJpWithSuffix];
       if (cls){
         const byClass = svg.querySelector(`g.prefecture.${CSS.escape(cls)}`);
         if (byClass) return byClass;
       }
 
-      // 2) title / data-jp で探す（例: <title>奈良 / Nara</title>）
       const groups = getPrefGroups(svg);
       for(const g of groups){
         const jp = (g.dataset.jp || "").trim();
@@ -786,8 +811,6 @@
         const title = g.querySelector("title")?.textContent || "";
         if (title.includes(prefShort)) return g;
       }
-
-      // 3) data-code で探したい場合はここに追加（必要なら）
       return null;
     }
 
@@ -798,7 +821,6 @@
       if(!japanSvgEl) return;
       const svg = japanSvgEl;
 
-      // reset（全部の塗り対象を戻す）
       svg.querySelectorAll(".pref").forEach(el=>{
         el.classList.remove("active");
         el.classList.remove("dim");
@@ -808,12 +830,10 @@
 
       const group = findPrefGroup(svg, prefJp);
       if(!group){
-        // ステータスは壊さない（地図だけ注意）
         console.warn("Map: prefecture not matched:", prefJp);
         return;
       }
 
-      // まず全部 dim、次に対象だけ active
       svg.querySelectorAll(".pref").forEach(el=> el.classList.add("dim"));
 
       group.querySelectorAll("path.pref, polygon.pref").forEach(shape=>{
@@ -822,33 +842,55 @@
       });
     }
 
-    // ---------- Collection (Save/Unsave) ----------
-    async function saveBottle(sakeId, bottleMeta){
-      if (!db) throw new Error("Firestore not ready");
-      if (!me) throw new Error("Not signed in");
-      const ref = db.collection(USERS_COLLECTION).doc(me.uid).collection("saved").doc(String(sakeId));
-      await ref.set({
-        sakeId: String(sakeId),
-        name_jp: bottleMeta?.name_jp || "",
-        name_en: bottleMeta?.name_en || "",
-        region_jp: bottleMeta?.region_jp || "",
-        style_en: bottleMeta?.style_en || "",
-        savedAt: firebase.firestore.FieldValue.serverTimestamp()
-      }, {merge:true});
+    // ---------- My reviewed list ----------
+    async function loadMyReviewed(){
+      if (!db || !me) return [];
+      const snap = await db
+        .collection(USERS_COLLECTION)
+        .doc(me.uid)
+        .collection("reviewed")
+        .orderBy("reviewedAt", "desc")
+        .limit(200)
+        .get();
+
+      const out = [];
+      snap.forEach(d => out.push({ id: d.id, ...d.data() }));
+      return out;
     }
 
-    async function unsaveBottle(sakeId){
-      if (!db) throw new Error("Firestore not ready");
-      if (!me) throw new Error("Not signed in");
-      const ref = db.collection(USERS_COLLECTION).doc(me.uid).collection("saved").doc(String(sakeId));
-      await ref.delete();
-    }
+    function renderMyReviewedSection(reviewed){
+      const listEl = document.getElementById("myReviewedList");
+      if (!listEl) return;
+      listEl.innerHTML = "";
 
-    async function isSavedBottle(sakeId){
-      if (!db || !me) return false;
-      const ref = db.collection(USERS_COLLECTION).doc(me.uid).collection("saved").doc(String(sakeId));
-      const snap = await ref.get();
-      return snap.exists;
+      if (!reviewed || reviewed.length === 0){
+        listEl.innerHTML = `
+          <div class="item" style="grid-column:1/-1;">
+            <div class="n">まだ履歴がありません</div>
+            <div class="s">QRで銘柄ページ → レビュー投稿すると、ここに追加されます。</div>
+          </div>
+        `;
+        return;
+      }
+
+      reviewed.forEach(s=>{
+        const url = `${location.pathname}?id=${encodeURIComponent(s.sakeId || s.id)}`;
+        const jp = escapeHtml(s.name_jp || s.sakeId || s.id || "—");
+        const en = escapeHtml(s.name_en || "");
+        const region = escapeHtml(s.region_jp || "");
+        const style = escapeHtml(s.style_en || "");
+        const card = document.createElement("div");
+        card.className = "item";
+        card.innerHTML = `
+          <div class="n">✍️ ${jp}</div>
+          <div class="s">${en}</div>
+          <div class="badge">${style} · <span class="muted">${region}</span></div>
+          <div class="go">
+            <a class="btn secondary" href="${url}">Open / 開く</a>
+          </div>
+        `;
+        listEl.appendChild(card);
+      });
     }
 
     // ---------- Shared reviews ----------
@@ -866,6 +908,7 @@
 
     function setRatingBadge(avg, count){
       const b = document.getElementById("ratingBadge");
+      if (!b) return;
       if (!count){ b.textContent = "—"; return; }
       b.textContent = `★ ${avg.toFixed(1)} / 5  (${count})`;
     }
@@ -902,15 +945,6 @@
     let lastReviewsCache = [];
 
     async function listenReviewsShared(sakeId){
-      try{
-        me = await ensureAnonAuth();
-        setMeTag();
-      }catch(e){
-        console.error(e);
-        statusEl.textContent = "Auth error / 認証エラー（Anonymous有効化を確認）";
-        return;
-      }
-
       if (!db){
         statusEl.textContent = "Firebase init error / Firebase設定を確認";
         renderReviewsShared([]);
@@ -935,20 +969,43 @@
         });
     }
 
-    async function postReviewShared(sakeId, {name, rating, msg}){
-      me = me || await ensureAnonAuth();
-      if (!db) throw new Error("Firestore not ready");
+    function myReviewDocId(sakeId, uid){
+  return `${String(sakeId).slice(0,60)}_${String(uid).slice(0,80)}`;
+}
 
-      const clean = {
+    async function postReviewShared(sakeId, {name, rating, msg}){
+    me = me || await ensureAnonAuth();
+    if (!db) throw new Error("Firestore not ready");
+
+    const clean = {
         sakeId: String(sakeId || "").slice(0, 60),
         name: String(name || "Guest").trim().slice(0, 30),
         rating: Math.max(1, Math.min(5, Number(rating)||5)),
         msg: String(msg || "").trim().slice(0, 240),
         ts: firebase.firestore.FieldValue.serverTimestamp(),
         uid: String(me?.uid || "anon").slice(0, 80),
-      };
-      if (!clean.msg) throw new Error("Empty message");
-      await db.collection(REVIEWS_COLLECTION).add(clean);
+    };
+    if (!clean.msg) throw new Error("Empty message");
+
+    const docId = myReviewDocId(clean.sakeId, me.uid);
+
+    // docId固定で「1回だけ投稿」になる
+    // 既に存在すると Rules で create が拒否される（＝二重投稿防止）
+    await db.collection(REVIEWS_COLLECTION).doc(docId).set(clean);
+    }
+
+    async function markReviewed(sakeId, bottleMeta){
+      if (!db || !me) return;
+      const ref = db.collection(USERS_COLLECTION).doc(me.uid)
+        .collection("reviewed").doc(String(sakeId));
+      await ref.set({
+        sakeId: String(sakeId),
+        name_jp: bottleMeta?.name_jp || "",
+        name_en: bottleMeta?.name_en || "",
+        region_jp: bottleMeta?.region_jp || "",
+        style_en: bottleMeta?.style_en || "",
+        reviewedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge:true });
     }
 
     function exportReviewsJSON(){
@@ -974,16 +1031,13 @@
 
       const en = `${region} · ${brewery}. A ${style} sake${rice ? ` using ${rice}` : ""}. ${aroma ? `Aroma: ${aroma}.` : ""} ${palate ? `Palate: ${palate}.` : ""}`.replace(/\s+/g," ").trim();
       const jp = `${pick(it.region_jp,it.region_en)}の${pick(it.brewery_jp,it.brewery_en)}。${pick(it.style_jp,it.style_en)}${it.rice_jp ? `（${it.rice_jp}）` : ""}の魅力。${it.aroma_jp ? `香り：${it.aroma_jp}。` : ""}${it.palate_jp ? `味わい：${it.palate_jp}。` : ""}`.replace(/\s+/g," ").trim();
-
       return jpOrEn(jp, en);
     }
 
-    // ---------- render list/sheet ----------
-    function renderList(items){
-      document.getElementById("listCard").style.display = "";
-      document.getElementById("countTag").textContent = `${items.length} bottles`;
-
+    // ---------- render all bottles (staff) ----------
+    function renderAllBottles(items){
       const list = document.getElementById("list");
+      if (!list) return;
       list.innerHTML = "";
 
       items.forEach(it=>{
@@ -1005,6 +1059,8 @@
     }
 
     async function renderSheet(it){
+      window.__currentBottleMeta = it;
+
       currentSakeId = it.id;
       document.getElementById("sheetCard").style.display = "";
       document.getElementById("sideCard").style.display = "";
@@ -1046,11 +1102,9 @@
       document.getElementById("glass").textContent   = jpOrEn(it.glass_jp, it.glass_en);
       document.getElementById("copy").textContent    = jpOrEn(it.copy_jp, it.copy_en);
 
-      // Story
       document.getElementById("storyText").textContent = buildStory(it);
       document.getElementById("storyHint").textContent = "auto";
 
-      // Visual bars (0–5)
       const sweet = setBar("bar_sweet", it.sweet);
       const aroma = setBar("bar_aroma", it.aroma_intensity);
       const body  = setBar("bar_body",  it.body);
@@ -1063,101 +1117,78 @@
 
       document.getElementById("tasteSvgWrap").innerHTML = tasteSvg({sweet, aroma, body, acid});
 
-      // ✅ Map highlight（SVG）
       const pref = prefectureFromRegionJP(it.region_jp || "");
       highlightPrefOnMap(pref);
 
-      // Auth / Save UI
-      const authBtn = document.getElementById("authBtn");
-      const saveBtn = document.getElementById("saveBtn");
-      const unsaveBtn = document.getElementById("unsaveBtn");
+      // My Page link from bottle page
+      const myPageBtn = document.getElementById("myPageBtn");
+      if (myPageBtn){
+        myPageBtn.onclick = async (e) => {
+          e.preventDefault();
+          try{
+            me = me || await ensureAnonAuth();
+            setMeTag();
+          }catch(_){}
+          location.href = "./index.html";
+        };
+      }
 
-      authBtn.onclick = async () => {
-        try{
-          me = await ensureAnonAuth();
-          setMeTag();
-          statusEl.textContent = "Ready ✅ / 記録できます";
-        }catch(e){
-          console.error(e);
-          statusEl.textContent = "Auth error / 認証エラー（Anonymous有効化を確認）";
-        }
-      };
-
-    saveBtn.onclick = async () => {
-    try{
-        me = me || await ensureAnonAuth();
-        await saveBottle(it.id, it);
-        statusEl.textContent = "Saved ⭐ / 保存しました";
-        document.getElementById("saveHint").textContent = "⭐ Saved. この銘柄はコレクションに入っています。";
-    }catch(e){
-        console.error(e);
-        const code = e?.code ? ` (${e.code})` : "";
-        const msg  = e?.message ? e.message : String(e);
-        statusEl.textContent = `Save failed${code}: ${msg}`;
-    }
-    };
-
-      unsaveBtn.onclick = async () => {
-        try{
-          me = me || await ensureAnonAuth();
-          await unsaveBottle(it.id);
-          statusEl.textContent = "Removed / 解除しました";
-          document.getElementById("saveHint").textContent = "Tip: Save すると“旅のコレクション”に残せます。";
-        }catch(e){
-          console.error(e);
-          statusEl.textContent = "Remove failed / 解除失敗";
-        }
-      };
-
-    // ✅ Saved一覧へ（個別ページから）
-    const savedListBtn = document.getElementById("savedListBtn");
-    if (savedListBtn){
-    savedListBtn.onclick = async (e) => {
-        e.preventDefault();
-        try{
-        me = me || await ensureAnonAuth(); // 先に匿名UIDを確定
-        setMeTag();
-        }catch(_){}
-        location.href = "./index.html"; // ?id無しへ
-    };
-    }
-    
-      // Reviews: start listener
+      // Start reviews listener
       listenReviewsShared(it.id);
 
       // Post button
       document.getElementById("submitReviewBtn").onclick = async () => {
-        const name = document.getElementById("rv_name").value || "Guest";
-        const rating = Number(document.getElementById("rv_rating").value || 5);
-        const msg = document.getElementById("rv_msg").value || "";
         try{
           me = me || await ensureAnonAuth();
-          await postReviewShared(it.id, { name, rating, msg });
+          setMeTag();
+
+          // 1) input
+          let name = (document.getElementById("rv_name").value || "").trim();
+          const rating = Number(document.getElementById("rv_rating").value || 5);
+          const msg = document.getElementById("rv_msg").value || "";
+
+          // 2) if empty, try saved name; else ask to input
+          if (!name){
+            const prof = await loadMyProfile();
+            if (prof.displayName){
+              name = prof.displayName;
+              document.getElementById("rv_name").value = name;
+            }else{
+              statusEl.textContent = "Please enter your name first / お名前を入れてください";
+              document.getElementById("rv_name").focus();
+              return;
+            }
+          }
+
+          // 3) save name (registration)
+          await saveMyDisplayName(name);
+
+          // 4) post
+          await postReviewShared(currentSakeId, { name, rating, msg });
+
+          // 5) mark reviewed (my history)
+          await markReviewed(currentSakeId, window.__currentBottleMeta || null);
+
           document.getElementById("rv_msg").value = "";
           statusEl.textContent = "Posted ✅ / 投稿しました";
         }catch(err){
-          console.error(err);
-          const code = err?.code ? ` (${err.code})` : "";
-          const m  = err?.message ? err.message : String(err);
-          statusEl.textContent = `Post failed${code}: ${m}`;
+        console.error(err);
+        const code = err?.code || "";
+        const m  = err?.message ? err.message : String(err);
+
+        // 二重投稿時は permission-denied になりやすいのでメッセージを友好的に
+        if (code === "permission-denied" || /permission/i.test(m)) {
+            statusEl.textContent = "You already posted a review for this bottle. / この銘柄のレビューは1回までです（修正はスタッフにお声がけください）";
+        } else {
+            statusEl.textContent = `Post failed${code ? ` (${code})` : ""}: ${m}`;
         }
-      };
+        }
+        };
 
       document.getElementById("exportReviewsBtn").onclick = () => {
         exportReviewsJSON();
         statusEl.textContent = "Exported ✅ / 書き出しました";
       };
-
-      // show save state
-      try{
-        if (auth?.currentUser) me = auth.currentUser;
-        if (me && it.id){
-          const saved = await isSavedBottle(it.id);
-          document.getElementById("saveHint").textContent = saved
-            ? "⭐ Saved. この銘柄はコレクションに入っています。"
-            : "Tip: Save すると“旅のコレクション”に残せます。";
-        }
-      }catch(_){}
     }
 
     async function main(){
@@ -1167,6 +1198,25 @@
             me = u || null;
             setMeTag();
           });
+        }
+
+        // ✅ auto anonymous login (always)
+        try{
+          me = await ensureAnonAuth();
+          setMeTag();
+
+          // restore saved name into form (if exists)
+          const prof = await loadMyProfile();
+          if (prof.displayName){
+            const nameEl = document.getElementById("rv_name");
+            if (nameEl) nameEl.value = prof.displayName;
+            setMyNameBadge(prof.displayName);
+          }else{
+            setMyNameBadge("");
+          }
+        }catch(e){
+          console.error(e);
+          statusEl.textContent = "Auth error / 認証エラー（Anonymous有効化を確認）";
         }
 
         // load map svg early
@@ -1185,28 +1235,63 @@
 
         statusEl.textContent = `CSV loaded ✅ (${items.length})`;
 
+        // My Page (no ?id)
         if(!targetId){
-        renderList(items);
+          document.getElementById("listCard").style.display = "";
 
-        // ★ Saved表示：ログインできていれば読み込んで上に表示
-        try{
-            me = await ensureAnonAuth();
-            setMeTag();
-            const saved = await loadMySaved();
-            renderSavedSection(saved);
-        }catch(e){
-            // ここで失敗しても通常の一覧は見せる
-            console.warn("saved load skipped", e);
+          // My name badge
+          try{
+            const prof = await loadMyProfile();
+            setMyNameBadge(prof.displayName || "");
+          }catch(_){}
+
+          // Change name (only affects future posts)
+          const changeBtn = document.getElementById("changeNameBtn");
+          if (changeBtn){
+            changeBtn.onclick = async () => {
+              const current = localStorage.getItem(LS_NAME_KEY) || "";
+              const next = prompt("表示名（次回以降の投稿名）を入力してください（30文字以内）", current);
+              if (next === null) return;
+              const nm = String(next || "").trim().slice(0,30);
+              if (!nm){
+                alert("空は不可です。");
+                return;
+              }
+              try{
+                me = me || await ensureAnonAuth();
+                await saveMyDisplayName(nm);
+                setMyNameBadge(nm);
+                statusEl.textContent = "Name updated ✅ / 名前を更新しました";
+              }catch(e){
+                console.error(e);
+                statusEl.textContent = "Name update failed / 更新失敗";
+              }
+            };
+          }
+
+          // Load my reviewed history
+          try{
+            me = me || await ensureAnonAuth();
+            const reviewed = await loadMyReviewed();
+            renderMyReviewedSection(reviewed);
+          }catch(e){
+            console.warn("reviewed load skipped", e);
+            renderMyReviewedSection([]);
+          }
+
+          // Staff list
+          document.getElementById("countTag").textContent = `${items.length} bottles`;
+          renderAllBottles(items);
+          return;
         }
 
-        return;
-        }
-
-
+        // Bottle page (?id)
         const it = items.find(x => String(x.id) === String(targetId));
         if(!it){
           statusEl.textContent = "Not found / 銘柄IDが見つかりません";
-          renderList(items);
+          document.getElementById("listCard").style.display = "";
+          document.getElementById("countTag").textContent = `${items.length} bottles`;
+          renderAllBottles(items);
           return;
         }
 
@@ -1217,8 +1302,11 @@
         statusEl.textContent = "Load error / 読み込みエラー";
         document.getElementById("listCard").style.display = "";
         document.getElementById("list").innerHTML =
-          `<div class="hint">Could not load <span class="muted">${escapeHtml(CSV_PATH)}</span>. Put it next to index.html. / 同階層にsake.csvを置いてください。</div>
-           <div class="hint muted">※ file:// 直開きだと fetch がブロックされることがあります。Web公開（GitHub Pages等）推奨。</div>`;
+          `<div class="item" style="grid-column:1/-1;">
+             <div class="n">Could not load data</div>
+             <div class="s">Put <span class="muted">${escapeHtml(CSV_PATH)}</span> next to index.html / 同階層にsake.csvを置いてください。</div>
+             <div class="s muted">※ file:// 直開きだと fetch がブロックされることがあります。Web公開（GitHub Pages等）推奨。</div>
+           </div>`;
       }
     }
 
