@@ -32,13 +32,13 @@
       line-height:1.45;
     }
     a{ color:inherit; text-decoration:none; }
-    .wrap{ max-width: 980px; margin: 0 auto; padding: 18px; }
+    .wrap{ max-width: 1020px; margin: 0 auto; padding: 18px; }
     header{
       display:flex; gap:12px; align-items:center; justify-content:space-between;
       margin: 10px 0 14px;
     }
     .brand{ display:flex; flex-direction:column; gap:2px; }
-    .brand .name{ font-weight: 750; letter-spacing:.2px; }
+    .brand .name{ font-weight: 780; letter-spacing:.2px; }
     .brand .sub{ color:var(--muted); font-size: 12px; }
     .pill{
       display:inline-flex; align-items:center; gap:8px;
@@ -48,7 +48,8 @@
       white-space:nowrap;
     }
     .grid{ display:grid; grid-template-columns: 1.1fr .9fr; gap: 14px; }
-    @media (max-width: 860px){ .grid{ grid-template-columns: 1fr; } }
+    @media (max-width: 900px){ .grid{ grid-template-columns: 1fr; } }
+
     .card{
       border: 1px solid var(--line);
       background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.04));
@@ -63,7 +64,7 @@
       display:flex; gap:12px; align-items:flex-start; justify-content:space-between;
     }
     .title{ display:flex; flex-direction:column; gap:4px; min-width: 0; }
-    .title .jp{ font-size: 18px; font-weight: 800; }
+    .title .jp{ font-size: 18px; font-weight: 820; }
     .title .en{ font-size: 12px; color: var(--muted); }
     .tags{ display:flex; flex-wrap:wrap; gap:6px; justify-content:flex-end; }
     .tag{
@@ -73,6 +74,10 @@
       background: rgba(0,0,0,.18);
       border-radius: 999px;
       color: var(--muted);
+      max-width: 100%;
+      overflow:hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
     .body{ padding: 14px; }
     .row{ display:flex; gap:10px; flex-wrap:wrap; }
@@ -84,8 +89,9 @@
       background: rgba(255,255,255,.03);
     }
     .kpi .k{ font-size: 11px; color: var(--muted); display:flex; justify-content:space-between; gap:10px; }
-    .kpi .v{ font-size: 14px; font-weight: 750; margin-top: 4px; }
+    .kpi .v{ font-size: 14px; font-weight: 760; margin-top: 4px; }
     .mini{ font-size: 11px; color: var(--muted); margin-top: 2px; }
+
     .table{
       width:100%;
       border-collapse: collapse;
@@ -99,7 +105,9 @@
     }
     .table th{ text-align:left; color: var(--muted); width: 34%; font-weight: 650; }
     .muted{ color: var(--muted); }
+
     .viz{ display:grid; grid-template-columns: 1fr; gap: 10px; }
+
     .bar{
       display:flex; align-items:center; gap:10px;
       padding: 10px 12px;
@@ -107,9 +115,9 @@
       border-radius: 14px;
       background: rgba(255,255,255,.03);
     }
-    .bar .label{ width: 84px; font-size: 12px; color: var(--muted); }
+    .bar .label{ width: 92px; font-size: 12px; color: var(--muted); }
     .track{
-      flex:1; height: 10px;
+      flex:1; height: 8px;
       border-radius: 999px;
       background: rgba(255,255,255,.08);
       overflow:hidden;
@@ -121,6 +129,7 @@
       background: linear-gradient(90deg, rgba(215,181,109,.95), rgba(126,227,166,.85));
     }
     .bar .val{ width: 28px; text-align:right; font-size: 12px; color: var(--muted); }
+
     .chart{
       padding: 12px;
       border: 1px solid var(--line);
@@ -132,6 +141,21 @@
       font-size:12px; color: var(--muted); margin-bottom: 8px;
     }
     .svgwrap{ width:100%; display:flex; justify-content:center; }
+
+    .badge{
+      display:inline-flex; align-items:center; gap:6px;
+      font-size: 11px; color: var(--muted);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 6px 8px;
+      width: fit-content;
+      background: rgba(0,0,0,.12);
+      white-space: nowrap;
+      overflow:hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+    }
+
     .actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top: 12px; }
     button, .btn{
       appearance:none; border:none;
@@ -140,7 +164,7 @@
       background: rgba(215,181,109,.18);
       border: 1px solid rgba(215,181,109,.35);
       color: var(--text);
-      font-weight: 700;
+      font-weight: 740;
       cursor:pointer;
     }
     button.secondary, .btn.secondary{
@@ -151,10 +175,18 @@
     }
     .btn{ display:inline-flex; align-items:center; gap:8px; }
     .hint{ font-size: 11px; color: var(--muted); margin-top: 8px; }
-    .reviews{
-      display:flex; flex-direction:column; gap:10px;
-      margin-top: 12px;
+
+    .story{
+      margin-top: 10px;
+      border: 1px solid var(--line);
+      background: rgba(0,0,0,.14);
+      border-radius: 14px;
+      padding: 10px 12px;
     }
+    .story .h{ font-size: 11px; color: var(--muted); margin-bottom: 6px; display:flex; justify-content:space-between; gap:10px; }
+    .story .p{ font-size: 13px; }
+
+    .reviews{ display:flex; flex-direction:column; gap:10px; margin-top: 12px; }
     .review{
       border: 1px solid var(--line);
       background: rgba(0,0,0,.18);
@@ -167,6 +199,7 @@
       margin-bottom: 6px;
     }
     .review .msg{ font-size: 13px; }
+
     .form{
       margin-top: 10px;
       border: 1px solid var(--line);
@@ -188,6 +221,7 @@
       outline:none;
     }
     textarea{ min-height: 84px; resize: vertical; }
+
     .footnote{
       padding: 14px;
       border-top: 1px solid var(--line);
@@ -196,40 +230,39 @@
       display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px;
       background: rgba(255,255,255,.02);
     }
+
     .list{
       display:grid;
       grid-template-columns: repeat(2, minmax(0,1fr));
       gap: 10px;
     }
-    @media (max-width: 700px){ .list{ grid-template-columns: 1fr; } }
+    @media (max-width: 720px){ .list{ grid-template-columns: 1fr; } }
     .item{
       border: 1px solid var(--line);
       border-radius: 14px;
       background: rgba(255,255,255,.03);
       padding: 12px;
       display:flex; flex-direction:column; gap:8px;
+      min-width:0;
     }
-    .item .n{ font-weight: 800; }
+    .item .n{ font-weight: 820; }
     .item .s{ color: var(--muted); font-size: 12px; }
-    .item .go{ margin-top:auto; }
-    .badge{
-      display:inline-flex; align-items:center; gap:6px;
-      font-size: 11px; color: var(--muted);
+    .item .go{ margin-top:auto; display:flex; gap:10px; flex-wrap:wrap; }
+
+    /* Map block */
+    .mapbox{
       border: 1px solid var(--line);
-      border-radius: 999px;
-      padding: 6px 8px;
-      width: fit-content;
-      background: rgba(0,0,0,.12);
-    }
-    .warnbox{
-      border: 1px solid rgba(255,207,107,.45);
-      background: rgba(255,207,107,.08);
-      color: rgba(255,255,255,.85);
       border-radius: 14px;
-      padding: 10px 12px;
-      font-size: 12px;
-      margin-top: 10px;
+      background: rgba(255,255,255,.03);
+      padding: 12px;
+      overflow:hidden;
     }
+    .mapbox .caption{
+      display:flex; justify-content:space-between; align-items:center;
+      font-size:12px; color: var(--muted); margin-bottom: 8px;
+    }
+    .mapwrap{ width:100%; display:flex; justify-content:center; }
+    .mapwrap svg{ width: 100%; max-width: 360px; height:auto; }
   </style>
 </head>
 
@@ -282,14 +315,20 @@
             <tr><th>ひと言 / One-liner</th><td id="copy">—</td></tr>
           </table>
 
-          <div class="actions">
-            <a class="btn secondary" id="copyLinkBtn" href="#">🔗 Link / リンク</a>
-            <button class="secondary" id="copyQrTextBtn" type="button">📎 QR用URLコピー</button>
+          <div class="story">
+            <div class="h">
+              <span>📖 Story / ストーリー</span>
+              <span class="muted" id="storyHint">auto</span>
+            </div>
+            <div class="p" id="storyText">—</div>
           </div>
 
-          <div class="hint">
-            ※ QRは <span class="muted">index.html?id=銘柄ID</span> を想定（CSVのid列）。
+          <div class="actions">
+            <button class="secondary" id="authBtn" type="button">👤 Start saving / 記録を始める</button>
+            <button id="saveBtn" type="button">⭐ Save / 保存</button>
+            <button class="secondary" id="unsaveBtn" type="button">✦ Unsave / 解除</button>
           </div>
+          <div class="hint" id="saveHint">Tip: 端末にひもづく「旅のコレクション」を作れます。</div>
         </div>
 
         <div class="footnote">
@@ -303,7 +342,7 @@
         <div class="hd">
           <div class="title">
             <div class="jp">ビジュアル / Visual</div>
-            <div class="en">Quick taste map + shared reviews</div>
+            <div class="en">Map + taste compass + reviews</div>
           </div>
           <div class="tags">
             <span class="tag" id="idTag">id: —</span>
@@ -312,6 +351,16 @@
 
         <div class="body">
           <div class="viz">
+            <!-- Map -->
+            <div class="mapbox">
+              <div class="caption">
+                <span>🗾 Origin / 産地マップ</span>
+                <span class="muted" id="mapMeta">—</span>
+              </div>
+              <div class="mapwrap" id="mapWrap"></div>
+              <div class="hint muted">※ 都道府県は概算座標でピン表示（MVP）。</div>
+            </div>
+
             <!-- Bars -->
             <div class="bar">
               <div class="label">甘辛 / Sweet-Dry</div>
@@ -334,14 +383,14 @@
               <div class="val" id="val_acid">—</div>
             </div>
 
-            <!-- Mini chart -->
+            <!-- Taste compass -->
             <div class="chart">
               <div class="caption">
-                <span>味わいマップ / Taste Map</span>
+                <span>🧭 Taste Compass / 味の羅針盤</span>
                 <span class="muted">0–5</span>
               </div>
               <div class="svgwrap" id="tasteSvgWrap"></div>
-              <div class="hint muted">※数値はCSVの (sweet, aroma_intensity, body, acidity) を使用。</div>
+              <div class="hint muted">※ CSV: (sweet, aroma_intensity, body, acidity)</div>
             </div>
 
             <!-- Reviews -->
@@ -378,12 +427,8 @@
                   <button id="submitReviewBtn" type="button">✍️ Post / 投稿</button>
                   <button class="secondary" id="exportReviewsBtn" type="button">⬇️ Export JSON</button>
                 </div>
-                <div class="hint">
-                  ※ 全員共有（Firestore）。不適切投稿対策は「ルール/認証」で強化できます。
-                </div>
-                <div class="warnbox">
-                  Tip: Firestoreの無料枠でも多くの店舗運用は十分です。<br/>
-                  本格運用は「文字数制限/NGワード」「管理者だけ削除」「匿名ID付与」などを追加できます。
+                <div class="hint muted">
+                  ※ Save は端末にひもづく匿名アカウントでOK（複雑な登録なし）。
                 </div>
               </div>
             </div>
@@ -392,68 +437,63 @@
         </div>
       </aside>
 
-      <!-- List view (when no id param) -->
+      <!-- List view -->
       <section class="card" id="listCard" style="display:none; grid-column: 1 / -1;">
         <div class="hd">
           <div class="title">
             <div class="jp">銘柄一覧 / Sake List</div>
-            <div class="en">Tap a bottle to open its QR page.</div>
+            <div class="en">Tap a bottle to open its page.</div>
           </div>
           <div class="tags">
             <span class="tag" id="countTag">—</span>
+            <span class="tag" id="meTag">me: —</span>
           </div>
         </div>
         <div class="body">
           <div class="list" id="list"></div>
-          <div class="hint">QRは <span class="muted">index.html?id=銘柄ID</span> を生成して貼り付けてください。</div>
+          <div class="hint muted">※ QRは「GitHub Pages側が生成」。このページは id パラメータで個別表示します。</div>
         </div>
       </section>
     </main>
   </div>
 
-  <!-- ✅ Firebase (Firestore) SDK - compat版（単一HTMLで簡単運用） -->
+  <!-- Firebase (compat) -->
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 
   <script>
-    /**
-     * ✅ 使い方
-     * - 同階層に sake.csv を置く
-     * - QR: index.html?id=銘柄ID
-     *
-     * ✅ Firebase設定
-     * - 下の firebaseConfig を Firebase Console の値に差し替える
-     * - Firestoreのルールは下の「ルール例」を参照
-     */
-
     // =========================
     // 1) Firebase設定（要差し替え）
     // =========================
     const firebaseConfig = {
-        apiKey: "AIzaSyD1sbz6sLUMf6tabsjwvteEOoQB6vFlcZU",
-        authDomain: "the-sake-council-reviews.firebaseapp.com",
-        projectId: "the-sake-council-reviews",
-      // storageBucket / messagingSenderId / appId は不要なら省略してOK
+      apiKey: "AIzaSyD1sbz6sLUMf6tabsjwvteEOoQB6vFlcZU",
+      authDomain: "the-sake-council-reviews.firebaseapp.com",
+      projectId: "the-sake-council-reviews",
     };
 
     // =========================
     // 2) App settings
     // =========================
     const CSV_PATH = "./sake.csv";
-    const REVIEWS_COLLECTION = "reviews";   // Firestore collection name
-    const REVIEW_LIMIT = 60;                // 表示する最大件数
+    const REVIEWS_COLLECTION = "reviews";
+    const USERS_COLLECTION   = "users";
+    const REVIEW_LIMIT = 60;
+
     const statusEl = document.getElementById("status");
 
-    // Query param
     const qs = new URLSearchParams(location.search);
-    const targetId = qs.get("id"); // per-bottle view
+    const targetId = qs.get("id");
     let currentSakeId = null;
 
     // Firebase init
     let db = null;
+    let auth = null;
+    let me = null; // firebase user
     try{
       firebase.initializeApp(firebaseConfig);
       db = firebase.firestore();
+      auth = firebase.auth();
     }catch(e){
       console.error(e);
     }
@@ -465,7 +505,7 @@
       return Number.isFinite(n) ? n : fallback;
     }
     function escapeHtml(s){
-      return String(s)
+      return String(s ?? "")
         .replaceAll("&","&amp;")
         .replaceAll("<","&lt;")
         .replaceAll(">","&gt;")
@@ -476,10 +516,22 @@
       const k = Math.max(1, Math.min(5, Number(n)||0));
       return "★★★★★".slice(0,k) + "☆☆☆☆☆".slice(0,5-k);
     }
+    function jpOrEn(jp, en){
+      const a = String(jp||"").trim();
+      const b = String(en||"").trim();
+      if (a && b) return `${a} / ${b}`;
+      return a || b || "—";
+    }
+    function pick(...xs){
+      for (const x of xs){
+        const s = String(x ?? "").trim();
+        if (s) return s;
+      }
+      return "";
+    }
 
     // ---------- CSV parsing ----------
     function parseCSV(text){
-      // Simple CSV parser supporting quotes
       const rows = [];
       let cur = "", inQ = false;
       const out = [];
@@ -494,7 +546,7 @@
         cur += ch;
       }
       out.push(cur);
-      if (out.some(v => v.length>0)) rows.push(out.slice());
+      if (out.some(v => (v ?? "").trim() !== "")) rows.push(out.slice());
 
       const header = rows.shift().map(h => h.trim());
       return rows
@@ -516,11 +568,8 @@
     }
 
     function tasteSvg({sweet, aroma, body, acid}){
-      // Simple diamond chart (4 axes) in SVG
-      // top: aroma, right: sweet, bottom: body, left: acid
       const W=220, H=160, cx=W/2, cy=H/2;
-      const max=5;
-      const r=58;
+      const max=5, r=58;
 
       const a = clamp01(aroma/max)*r;
       const s = clamp01(sweet/max)*r;
@@ -553,7 +602,104 @@
       `;
     }
 
-    // ---------- Firestore shared reviews ----------
+    // ---------- Map (MVP) ----------
+    // Prefecture centroid-ish points (rough). If unknown, no pin.
+    const PREF_POINTS = {
+      "北海道":[86,18], "青森県":[80,44], "岩手県":[84,48], "宮城県":[86,54], "秋田県":[78,50], "山形県":[80,56], "福島県":[84,60],
+      "新潟県":[72,64], "栃木県":[86,66], "群馬県":[80,68], "茨城県":[92,68], "埼玉県":[82,72], "千葉県":[92,74], "東京都":[86,74], "神奈川県":[84,78],
+      "山梨県":[78,74], "長野県":[72,70], "静岡県":[78,82], "愛知県":[70,82], "岐阜県":[66,78], "三重県":[64,86],
+      "富山県":[60,70], "石川県":[56,70], "福井県":[56,76], "滋賀県":[62,80], "京都府":[60,82], "大阪府":[60,86], "兵庫県":[54,84], "奈良県":[64,88], "和歌山県":[58,92],
+      "鳥取県":[46,82], "島根県":[40,82], "岡山県":[46,86], "広島県":[40,86], "山口県":[34,86],
+      "香川県":[44,92], "徳島県":[48,96], "愛媛県":[38,94], "高知県":[44,98],
+      "福岡県":[30,92], "佐賀県":[26,92], "長崎県":[22,94], "熊本県":[28,98], "大分県":[36,98], "宮崎県":[30,104], "鹿児島県":[26,110],
+      "沖縄県":[10,120]
+    };
+
+    function prefectureFromRegionJP(regionJP){
+      const s = String(regionJP||"").trim();
+      // e.g. "奈良県 / Nara" or "奈良県" を想定
+      const m = s.match(/(北海道|..県|..府|東京都)/);
+      return m ? m[1] : "";
+    }
+
+    function typeColor(typeText){
+      const t = String(typeText||"").toLowerCase();
+      if (t.includes("dry")) return "rgba(110,170,255,.95)";
+      if (t.includes("fruity")) return "rgba(255,160,190,.95)";
+      if (t.includes("rich")) return "rgba(215,181,109,.95)";
+      if (t.includes("light")) return "rgba(126,227,166,.95)";
+      return "rgba(215,181,109,.95)";
+    }
+
+    function japanMapSvg(pref, label, pinColor){
+      const W=220, H=140;
+      const p = PREF_POINTS[pref];
+      const pin = p ? `<circle cx="${p[0]}" cy="${p[1]}" r="4.2" fill="${pinColor}" stroke="rgba(255,255,255,.75)" stroke-width="1.2"/>
+                       <circle cx="${p[0]}" cy="${p[1]}" r="10" fill="${pinColor}" opacity=".12"/>` : "";
+      const cap = escapeHtml(label || (pref ? pref : "—"));
+      return `
+        <svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Japan map">
+          <rect x="0" y="0" width="${W}" height="${H}" rx="14" ry="14" fill="rgba(0,0,0,.14)" stroke="rgba(255,255,255,.10)"/>
+          <!-- super simplified archipelago blobs -->
+          <path d="M70 35 C85 30, 96 40, 92 52 C88 64, 76 66, 68 58 C62 52, 60 40, 70 35Z"
+                fill="rgba(255,255,255,.08)" stroke="rgba(255,255,255,.12)"/>
+          <path d="M60 60 C76 52, 92 64, 86 78 C80 92, 66 98, 56 88 C48 80, 48 68, 60 60Z"
+                fill="rgba(255,255,255,.07)" stroke="rgba(255,255,255,.12)"/>
+          <path d="M40 78 C56 72, 66 84, 58 98 C50 112, 36 112, 30 98 C26 88, 30 82, 40 78Z"
+                fill="rgba(255,255,255,.07)" stroke="rgba(255,255,255,.12)"/>
+          <path d="M20 104 C30 100, 36 110, 28 122 C20 134, 8 126, 10 114 C12 108, 14 106, 20 104Z"
+                fill="rgba(255,255,255,.06)" stroke="rgba(255,255,255,.12)"/>
+          ${pin}
+          <text x="12" y="20" font-size="11" fill="rgba(255,255,255,.72)">Japan</text>
+          <text x="12" y="${H-12}" font-size="11" fill="rgba(255,255,255,.78)">${cap}</text>
+        </svg>
+      `;
+    }
+
+    // ---------- Auth + Collection ----------
+    function setMeTag(){
+      const el = document.getElementById("meTag");
+      if (!el) return;
+      if (!me) { el.textContent = "me: —"; return; }
+      el.textContent = `me: ${me.isAnonymous ? "guest" : "user"} · ${String(me.uid).slice(0,6)}`;
+    }
+
+    async function ensureSignedIn(){
+      if (!auth) throw new Error("Auth not ready");
+      if (auth.currentUser) return auth.currentUser;
+      const res = await auth.signInAnonymously();
+      return res.user;
+    }
+
+    async function saveBottle(sakeId, bottleMeta){
+      if (!db) throw new Error("Firestore not ready");
+      if (!me) throw new Error("Not signed in");
+      const ref = db.collection(USERS_COLLECTION).doc(me.uid).collection("saved").doc(String(sakeId));
+      await ref.set({
+        sakeId: String(sakeId),
+        name_jp: bottleMeta?.name_jp || "",
+        name_en: bottleMeta?.name_en || "",
+        region_jp: bottleMeta?.region_jp || "",
+        style_en: bottleMeta?.style_en || "",
+        savedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, {merge:true});
+    }
+
+    async function unsaveBottle(sakeId){
+      if (!db) throw new Error("Firestore not ready");
+      if (!me) throw new Error("Not signed in");
+      const ref = db.collection(USERS_COLLECTION).doc(me.uid).collection("saved").doc(String(sakeId));
+      await ref.delete();
+    }
+
+    async function isSavedBottle(sakeId){
+      if (!db || !me) return false;
+      const ref = db.collection(USERS_COLLECTION).doc(me.uid).collection("saved").doc(String(sakeId));
+      const snap = await ref.get();
+      return snap.exists;
+    }
+
+    // ---------- Shared reviews ----------
     function reviewDocToUi(doc){
       const r = doc.data();
       const d = r.ts?.toDate?.() ?? new Date();
@@ -568,10 +714,7 @@
 
     function setRatingBadge(avg, count){
       const b = document.getElementById("ratingBadge");
-      if (!count){
-        b.textContent = "—";
-        return;
-      }
+      if (!count){ b.textContent = "—"; return; }
       b.textContent = `★ ${avg.toFixed(1)} / 5  (${count})`;
     }
 
@@ -585,7 +728,6 @@
         return;
       }
 
-      // average
       const sum = list.reduce((a,b)=>a+(b.rating||0),0);
       const avg = sum / list.length;
       setRatingBadge(avg, list.length);
@@ -613,12 +755,8 @@
         renderReviewsShared([]);
         return;
       }
-
-      // stop old listener
       if (typeof unsubscribeReviews === "function") unsubscribeReviews();
 
-      // Query: sakeId == X, orderBy ts desc, limit N
-      // ※ 初回に「インデックス作成が必要」と出たら、Firebase Consoleの案内リンクから作成してください（1回だけ）。
       unsubscribeReviews = db.collection(REVIEWS_COLLECTION)
         .where("sakeId", "==", sakeId)
         .orderBy("ts", "desc")
@@ -629,25 +767,22 @@
           lastReviewsCache = list;
           renderReviewsShared(list);
         }, err => {
-        console.error(err);
-        const code = err?.code ? ` (${err.code})` : "";
-        const msg  = err?.message ? err.message : String(err);
-        statusEl.textContent = `Review load error${code}: ${msg}`;
+          console.error(err);
+          const code = err?.code ? ` (${err.code})` : "";
+          const msg  = err?.message ? err.message : String(err);
+          statusEl.textContent = `Review load error${code}: ${msg}`;
         });
-        
     }
 
     async function postReviewShared(sakeId, {name, rating, msg}){
       if (!db) throw new Error("Firestore not ready");
-      // Basic sanitization / guard rails
       const clean = {
         sakeId: String(sakeId || "").slice(0, 60),
         name: String(name || "Guest").trim().slice(0, 30),
         rating: Math.max(1, Math.min(5, Number(rating)||5)),
         msg: String(msg || "").trim().slice(0, 240),
         ts: firebase.firestore.FieldValue.serverTimestamp(),
-        // optional: userAgent for abuse checks later (can be removed)
-        ua: navigator.userAgent.slice(0, 120)
+        uid: me?.uid ? String(me.uid).slice(0, 80) : "anon",
       };
       if (!clean.msg) throw new Error("Empty message");
       await db.collection(REVIEWS_COLLECTION).add(clean);
@@ -665,20 +800,40 @@
       URL.revokeObjectURL(a.href);
     }
 
+    // ---------- Story (auto) ----------
+    function buildStory(it){
+      const region = pick(it.region_en, it.region_jp);
+      const brewery = pick(it.brewery_en, it.brewery_jp);
+      const style = pick(it.style_en, it.style_jp);
+      const rice = pick(it.rice_en, it.rice_jp);
+      const aroma = pick(it.aroma_en, it.aroma_jp);
+      const palate = pick(it.palate_en, it.palate_jp);
+
+      const en = `${region} · ${brewery}. A ${style} sake${rice ? ` using ${rice}` : ""}. ${aroma ? `Aroma: ${aroma}.` : ""} ${palate ? `Palate: ${palate}.` : ""}`.replace(/\s+/g," ").trim();
+      const jp = `${pick(it.region_jp,it.region_en)}の${pick(it.brewery_jp,it.brewery_en)}。${pick(it.style_jp,it.style_en)}${it.rice_jp ? `（${it.rice_jp}）` : ""}の魅力。${it.aroma_jp ? `香り：${it.aroma_jp}。` : ""}${it.palate_jp ? `味わい：${it.palate_jp}。` : ""}`.replace(/\s+/g," ").trim();
+
+      // 2 lines-ish
+      return jpOrEn(jp, en);
+    }
+
     // ---------- render list/sheet ----------
     function renderList(items){
       document.getElementById("listCard").style.display = "";
       document.getElementById("countTag").textContent = `${items.length} bottles`;
+
       const list = document.getElementById("list");
       list.innerHTML = "";
+
       items.forEach(it=>{
         const card = document.createElement("div");
         card.className = "item";
         const url = `${location.pathname}?id=${encodeURIComponent(it.id)}`;
+        const type = pick(it["分類タイプ"], it.style_en, it.style_jp, "—");
+        const region = pick(it.region_en, it.region_jp, "—");
         card.innerHTML = `
           <div class="n">${escapeHtml(it.name_jp || it.id || "—")}</div>
           <div class="s">${escapeHtml(it.name_en || "")}</div>
-          <div class="badge">${escapeHtml(it.style_jp || "—")} <span class="muted">/</span> ${escapeHtml(it.style_en || "")}</div>
+          <div class="badge">${escapeHtml(type)} · <span class="muted">${escapeHtml(region)}</span></div>
           <div class="go">
             <a class="btn secondary" href="${url}">Open / 開く</a>
           </div>
@@ -687,58 +842,51 @@
       });
     }
 
-    function renderSheet(it){
+    async function renderSheet(it){
       currentSakeId = it.id;
       document.getElementById("sheetCard").style.display = "";
       document.getElementById("sideCard").style.display = "";
 
-      // title
       document.getElementById("name_jp").textContent = it.name_jp || it.id || "—";
       document.getElementById("name_en").textContent = it.name_en || "";
       document.getElementById("idTag").textContent = `id: ${it.id || "—"}`;
 
-      // tags
       const tags = document.getElementById("tags");
       tags.innerHTML = "";
-      [it.category_jp, it.category_en, it.region_jp, it.region_en].filter(Boolean).slice(0,4).forEach(t=>{
+      [
+        pick(it["分類タイプ"], it.style_en, it.style_jp),
+        pick(it.category_en, it.category_jp),
+        pick(it.region_en, it.region_jp),
+        pick(it.brewery_en, it.brewery_jp),
+      ].filter(Boolean).slice(0,4).forEach(t=>{
         const s = document.createElement("span");
         s.className = "tag";
         s.textContent = t;
         tags.appendChild(s);
       });
 
-      // KPIs
-      document.getElementById("brewery").textContent =
-        [it.brewery_jp, it.brewery_en].filter(Boolean).join(" / ") || "—";
-      document.getElementById("region").textContent =
-        [it.region_jp, it.region_en].filter(Boolean).join(" / ") || "—";
+      document.getElementById("brewery").textContent = jpOrEn(it.brewery_jp, it.brewery_en);
+      document.getElementById("region").textContent  = jpOrEn(it.region_jp, it.region_en);
 
-      document.getElementById("style").textContent =
-        [it.style_jp, it.style_en].filter(Boolean).join(" / ") || "—";
-      document.getElementById("rice").textContent =
-        [it.rice_jp, it.rice_en].filter(Boolean).join(" / ") || "—";
+      document.getElementById("style").textContent   = jpOrEn(it.style_jp, it.style_en);
+      document.getElementById("rice").textContent    = jpOrEn(it.rice_jp, it.rice_en);
 
-      const abv = it.abv ? `${it.abv}%` : "—";
+      const abv = it.abv ? `${it.abv}%` : "";
       const smv = it.smv ? `SMV ${it.smv}` : "";
-      const acidity = it.acidity_value ? `Acidity ${it.acidity_value}` : "";
-      document.getElementById("spec").textContent = [abv, smv, acidity].filter(Boolean).join(" · ") || "—";
+      const acidityValue = it.acidity_value ? `Acidity ${it.acidity_value}` : "";
+      document.getElementById("spec").textContent = [abv, smv, acidityValue].filter(Boolean).join(" · ") || "—";
+      document.getElementById("polish").textContent = it.rice_polish ? `Rice polish ${it.rice_polish}%` : "—";
 
-      const polish = it.rice_polish ? `Rice polish ${it.rice_polish}%` : "";
-      document.getElementById("polish").textContent = polish || "—";
+      document.getElementById("aroma").textContent   = jpOrEn(it.aroma_jp, it.aroma_en);
+      document.getElementById("palate").textContent  = jpOrEn(it.palate_jp, it.palate_en);
+      document.getElementById("pairing").textContent = jpOrEn(it.pairing_jp, it.pairing_en);
+      document.getElementById("temp").textContent    = jpOrEn(it.temp_jp, it.temp_en);
+      document.getElementById("glass").textContent   = jpOrEn(it.glass_jp, it.glass_en);
+      document.getElementById("copy").textContent    = jpOrEn(it.copy_jp, it.copy_en);
 
-      // table
-      document.getElementById("aroma").textContent =
-        [it.aroma_jp, it.aroma_en].filter(Boolean).join(" / ") || "—";
-      document.getElementById("palate").textContent =
-        [it.palate_jp, it.palate_en].filter(Boolean).join(" / ") || "—";
-      document.getElementById("pairing").textContent =
-        [it.pairing_jp, it.pairing_en].filter(Boolean).join(" / ") || "—";
-      document.getElementById("temp").textContent =
-        [it.temp_jp, it.temp_en].filter(Boolean).join(" / ") || "—";
-      document.getElementById("glass").textContent =
-        [it.glass_jp, it.glass_en].filter(Boolean).join(" / ") || "—";
-      document.getElementById("copy").textContent =
-        [it.copy_jp, it.copy_en].filter(Boolean).join(" / ") || "—";
+      // Story
+      document.getElementById("storyText").textContent = buildStory(it);
+      document.getElementById("storyHint").textContent = "auto";
 
       // Visual bars (0–5)
       const sweet = setBar("bar_sweet", it.sweet);
@@ -751,24 +899,55 @@
       document.getElementById("val_body").textContent  = body.toFixed(0);
       document.getElementById("val_acid").textContent  = acid.toFixed(0);
 
-      document.getElementById("tasteSvgWrap").innerHTML =
-        tasteSvg({sweet, aroma, body, acid});
+      document.getElementById("tasteSvgWrap").innerHTML = tasteSvg({sweet, aroma, body, acid});
 
-      // Link actions
-      const url = new URL(location.href);
-      url.searchParams.set("id", it.id);
-      document.getElementById("copyLinkBtn").href = url.toString();
+      // Map
+      const pref = prefectureFromRegionJP(it.region_jp || "");
+      const label = pick(it.region_en, it.region_jp, "—");
+      const t = pick(it["分類タイプ"], it.style_en, it.style_jp, "");
+      const pinColor = typeColor(t);
+      document.getElementById("mapMeta").textContent = pref ? `${pref}` : "—";
+      document.getElementById("mapWrap").innerHTML = japanMapSvg(pref, label, pinColor);
 
-      document.getElementById("copyQrTextBtn").onclick = async () => {
+      // Auth / Save UI
+      const authBtn = document.getElementById("authBtn");
+      const saveBtn = document.getElementById("saveBtn");
+      const unsaveBtn = document.getElementById("unsaveBtn");
+
+      authBtn.onclick = async () => {
         try{
-          await navigator.clipboard.writeText(url.toString());
-          statusEl.textContent = "Copied URL ✅ / コピーしました";
+          me = await ensureSignedIn();
+          setMeTag();
+          statusEl.textContent = "Ready ✅ / 記録できます";
         }catch(e){
-          statusEl.textContent = "Copy failed / コピー失敗";
+          console.error(e);
+          statusEl.textContent = "Auth error / 認証エラー";
         }
       };
 
-      // ✅ Shared reviews: start listener
+      saveBtn.onclick = async () => {
+        try{
+          me = me || await ensureSignedIn();
+          await saveBottle(it.id, it);
+          statusEl.textContent = "Saved ⭐ / 保存しました";
+        }catch(e){
+          console.error(e);
+          statusEl.textContent = "Save failed / 保存失敗";
+        }
+      };
+
+      unsaveBtn.onclick = async () => {
+        try{
+          if (!me) me = await ensureSignedIn();
+          await unsaveBottle(it.id);
+          statusEl.textContent = "Removed / 解除しました";
+        }catch(e){
+          console.error(e);
+          statusEl.textContent = "Remove failed / 解除失敗";
+        }
+      };
+
+      // Reviews: start listener
       listenReviewsShared(it.id);
 
       // Post button
@@ -776,30 +955,46 @@
         const name = document.getElementById("rv_name").value || "Guest";
         const rating = Number(document.getElementById("rv_rating").value || 5);
         const msg = document.getElementById("rv_msg").value || "";
-
         try{
+          me = me || await ensureSignedIn(); // ensure uid exists
           await postReviewShared(it.id, { name, rating, msg });
           document.getElementById("rv_msg").value = "";
           statusEl.textContent = "Posted ✅ / 投稿しました";
-        } catch (err){
-        console.error(err);
-        // 追加：原因をそのまま表示
-        const code = err?.code ? ` (${err.code})` : "";
-        const msg  = err?.message ? err.message : String(err);
-        statusEl.textContent = `Post failed${code}: ${msg}`;
+        }catch(err){
+          console.error(err);
+          const code = err?.code ? ` (${err.code})` : "";
+          const m  = err?.message ? err.message : String(err);
+          statusEl.textContent = `Post failed${code}: ${m}`;
         }
-
       };
 
       document.getElementById("exportReviewsBtn").onclick = () => {
         exportReviewsJSON();
         statusEl.textContent = "Exported ✅ / 書き出しました";
       };
+
+      // show save state (optional)
+      try{
+        me = auth?.currentUser || me;
+        if (me && it.id){
+          const saved = await isSavedBottle(it.id);
+          document.getElementById("saveHint").textContent = saved
+            ? "⭐ Saved. この銘柄はコレクションに入っています。"
+            : "Tip: Save すると“旅のコレクション”に残せます。";
+        }
+      }catch(_){}
     }
 
     async function main(){
       try{
-        // Load CSV
+        // auth state
+        if (auth){
+          auth.onAuthStateChanged(u => {
+            me = u || null;
+            setMeTag();
+          });
+        }
+
         const res = await fetch(CSV_PATH, { cache: "no-store" });
         if(!res.ok) throw new Error("CSV fetch failed: " + res.status);
         const text = await res.text();
@@ -807,56 +1002,30 @@
 
         statusEl.textContent = `CSV loaded ✅ (${items.length})`;
 
-        // no id => list view
         if(!targetId){
           renderList(items);
           return;
         }
 
-        // id => per bottle view
         const it = items.find(x => String(x.id) === String(targetId));
         if(!it){
           statusEl.textContent = "Not found / 銘柄IDが見つかりません";
           renderList(items);
           return;
         }
-        renderSheet(it);
+        await renderSheet(it);
 
       }catch(err){
         console.error(err);
         statusEl.textContent = "Load error / 読み込みエラー";
         document.getElementById("listCard").style.display = "";
         document.getElementById("list").innerHTML =
-          `<div class="hint">Could not load <span class="muted">${CSV_PATH}</span>. Put it next to index.html. / 同階層にsake.csvを置いてください。</div>
+          `<div class="hint">Could not load <span class="muted">${escapeHtml(CSV_PATH)}</span>. Put it next to index.html. / 同階層にsake.csvを置いてください。</div>
            <div class="hint muted">※ file:// 直開きだと fetch がブロックされることがあります。Web公開（GitHub Pages等）推奨。</div>`;
       }
     }
 
     main();
   </script>
-
-  <!--
-  =============================
-  Firestore ルール例（最初はこれでOK）
-  =============================
-  rules_version = '2';
-  service cloud.firestore {
-    match /databases/{database}/documents {
-      match /reviews/{doc} {
-        allow read: if true;
-        allow create: if request.resource.data.msg is string
-                      && request.resource.data.msg.size() <= 240
-                      && request.resource.data.name is string
-                      && request.resource.data.name.size() <= 30
-                      && request.resource.data.rating in [1,2,3,4,5];
-        // 削除/更新は管理者のみ運用にするなら、ここは false のままでOK
-        allow update, delete: if false;
-      }
-    }
-  }
-
-  ※ onSnapshotで "index required" が出たら、Firebase Consoleの案内リンクから
-     (sakeId ASC, ts DESC) の複合インデックスを作成してください（1回だけ）。
-  -->
 </body>
 </html>
