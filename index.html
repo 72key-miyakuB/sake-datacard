@@ -47,8 +47,9 @@
       font-size: 12px; color: var(--muted);
       white-space:nowrap;
     }
-    .grid{ display:grid; grid-template-columns: 1.1fr .9fr; gap: 14px; }
-    @media (max-width: 900px){ .grid{ grid-template-columns: 1fr; } }
+
+    /* ✅ 案A：1枚カードに集約（gridは1列固定） */
+    .grid{ display:grid; grid-template-columns: 1fr; gap: 14px; }
 
     .card{
       border: 1px solid var(--line);
@@ -64,7 +65,13 @@
       display:flex; gap:12px; align-items:flex-start; justify-content:space-between;
     }
     .title{ display:flex; flex-direction:column; gap:4px; min-width: 0; }
-    .title .jp{ font-size: 18px; font-weight: 820; }
+    .title .jp{
+      font-size: 18px; font-weight: 820;
+      /* ✅ iOSで漢字2文字が縦に割れるのを抑止 */
+      word-break: keep-all;
+      overflow-wrap: normal;
+      line-break: strict;
+    }
     .title .en{ font-size: 12px; color: var(--muted); }
     .tags{ display:flex; flex-wrap:wrap; gap:6px; justify-content:flex-end; }
     .tag{
@@ -80,6 +87,14 @@
       white-space: nowrap;
     }
     .body{ padding: 14px; }
+
+    /* ✅ スマホではヘッダーを縦積み（タグが押して縦割れするのを防ぐ） */
+    @media (max-width: 560px){
+      .card .hd{ flex-direction:column; align-items:stretch; }
+      .tags{ justify-content:flex-start; }
+      .title .jp{ font-size: 20px; }
+    }
+
     .row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
     .kpi{
       flex:1; min-width: 170px;
@@ -106,14 +121,75 @@
     .table th{ text-align:left; color: var(--muted); width: 34%; font-weight: 650; }
     .muted{ color: var(--muted); }
 
-    .viz{ display:grid; grid-template-columns: 1fr; gap: 10px; }
+    .sectionTitle{
+      margin: 14px 0 10px;
+      font-weight: 900;
+      letter-spacing: .2px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+    }
+    .sectionTitle .sub{
+      font-weight: 650;
+      color: var(--muted);
+      font-size: 12px;
+    }
 
+    /* Map block */
+    .mapbox{
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(255,255,255,.03);
+      padding: 12px;
+      overflow:hidden;
+      margin-top: 10px;
+    }
+    .mapbox .caption{
+      display:flex; justify-content:space-between; align-items:center;
+      font-size:12px; color: var(--muted); margin-bottom: 8px;
+    }
+    .mapwrap{ width:100%; display:flex; justify-content:center; }
+
+    /* Japan SVG */
+    .mapwrap svg{
+      width:100%;
+      max-width: 420px;
+      height:auto;
+      display:block;
+    }
+    .pref{
+      fill: rgba(255,255,255,.06);
+      stroke: rgba(255,255,255,.18);
+      stroke-width: 1;
+      transition: .18s ease;
+    }
+    .pref.dim{ opacity: .40; }
+    .pref.active{
+      fill: rgba(215,181,109,.78);
+      stroke: rgba(215,181,109,.98);
+      filter: drop-shadow(0 0 10px rgba(215,181,109,.45));
+      opacity: 1;
+    }
+
+    .story{
+      margin-top: 10px;
+      border: 1px solid var(--line);
+      background: rgba(0,0,0,.14);
+      border-radius: 14px;
+      padding: 10px 12px;
+    }
+    .story .h{ font-size: 11px; color: var(--muted); margin-bottom: 6px; display:flex; justify-content:space-between; gap:10px; }
+    .story .p{ font-size: 13px; }
+
+    /* Bars */
     .bar{
       display:flex; align-items:center; gap:10px;
       padding: 10px 12px;
       border: 1px solid var(--line);
       border-radius: 14px;
       background: rgba(255,255,255,.03);
+      margin-top: 10px;
     }
     .bar .label{ width: 108px; font-size: 12px; color: var(--muted); }
     .track{
@@ -130,11 +206,13 @@
     }
     .bar .val{ width: 28px; text-align:right; font-size: 12px; color: var(--muted); }
 
+    /* Taste compass */
     .chart{
       padding: 12px;
       border: 1px solid var(--line);
       border-radius: 14px;
       background: rgba(255,255,255,.03);
+      margin-top: 10px;
     }
     .chart .caption{
       display:flex; justify-content:space-between; align-items:center;
@@ -142,6 +220,31 @@
     }
     .svgwrap{ width:100%; display:flex; justify-content:center; }
 
+    /* Reviews header */
+    .reviewHead{
+      border: 1px solid rgba(215,181,109,.35);
+      background: rgba(215,181,109,.08);
+      border-radius: 16px;
+      padding: 12px 12px;
+      margin-top: 10px;
+    }
+    .reviewHead .h1{
+      font-size: 16px;
+      font-weight: 900;
+      letter-spacing: .2px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin:0 0 6px;
+      flex-wrap:wrap;
+    }
+    .reviewHead .desc{
+      font-size: 12px;
+      color: var(--muted);
+      margin:0;
+      line-height: 1.6;
+    }
     .badge{
       display:inline-flex; align-items:center; gap:6px;
       font-size: 11px; color: var(--muted);
@@ -155,38 +258,6 @@
       text-overflow: ellipsis;
       max-width: 100%;
     }
-
-    .actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top: 12px; }
-    button, .btn{
-      appearance:none; border:none;
-      padding: 10px 12px;
-      border-radius: 14px;
-      background: rgba(215,181,109,.18);
-      border: 1px solid rgba(215,181,109,.35);
-      color: var(--text);
-      font-weight: 740;
-      cursor:pointer;
-    }
-    button.secondary, .btn.secondary{
-      background: rgba(255,255,255,.05);
-      border: 1px solid var(--line);
-      color: var(--text);
-      font-weight: 650;
-    }
-    .btn{ display:inline-flex; align-items:center; gap:8px; }
-    .hint{ font-size: 11px; color: var(--muted); margin-top: 8px; }
-
-    .story{
-      margin-top: 10px;
-      border: 1px solid var(--line);
-      background: rgba(0,0,0,.14);
-      border-radius: 14px;
-      padding: 10px 12px;
-    }
-    .story .h{ font-size: 11px; color: var(--muted); margin-bottom: 6px; display:flex; justify-content:space-between; gap:10px; }
-    .story .p{ font-size: 13px; }
-
-    /* Reviews */
     .reviews{ display:flex; flex-direction:column; gap:10px; margin-top: 12px; }
     .review{
       border: 1px solid var(--line);
@@ -223,6 +294,26 @@
     }
     textarea{ min-height: 84px; resize: vertical; }
 
+    .actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top: 12px; }
+    button, .btn{
+      appearance:none; border:none;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: rgba(215,181,109,.18);
+      border: 1px solid rgba(215,181,109,.35);
+      color: var(--text);
+      font-weight: 740;
+      cursor:pointer;
+    }
+    button.secondary, .btn.secondary{
+      background: rgba(255,255,255,.05);
+      border: 1px solid var(--line);
+      color: var(--text);
+      font-weight: 650;
+    }
+    .btn{ display:inline-flex; align-items:center; gap:8px; }
+    .hint{ font-size: 11px; color: var(--muted); margin-top: 8px; }
+
     .footnote{
       padding: 14px;
       border-top: 1px solid var(--line);
@@ -232,7 +323,13 @@
       background: rgba(255,255,255,.02);
     }
 
-    /* List */
+    .hr{
+      height:1px;
+      background: rgba(255,255,255,.10);
+      margin: 12px 0;
+    }
+
+    /* List (My Page) */
     .list{
       display:grid;
       grid-template-columns: repeat(2, minmax(0,1fr));
@@ -250,70 +347,6 @@
     .item .n{ font-weight: 820; }
     .item .s{ color: var(--muted); font-size: 12px; }
     .item .go{ margin-top:auto; display:flex; gap:10px; flex-wrap:wrap; }
-
-    /* Map block */
-    .mapbox{
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      background: rgba(255,255,255,.03);
-      padding: 12px;
-      overflow:hidden;
-    }
-    .mapbox .caption{
-      display:flex; justify-content:space-between; align-items:center;
-      font-size:12px; color: var(--muted); margin-bottom: 8px;
-    }
-    .mapwrap{ width:100%; display:flex; justify-content:center; }
-
-    /* ===== Japan SVG map style (県ハイライト) ===== */
-    .mapwrap svg{
-      width:100%;
-      max-width: 360px;
-      height:auto;
-      display:block;
-    }
-    .pref{
-      fill: rgba(255,255,255,.06);
-      stroke: rgba(255,255,255,.18);
-      stroke-width: 1;
-      transition: .18s ease;
-    }
-    .pref.dim{ opacity: .40; }
-    .pref.active{
-      fill: rgba(215,181,109,.78);
-      stroke: rgba(215,181,109,.98);
-      filter: drop-shadow(0 0 10px rgba(215,181,109,.45));
-      opacity: 1;
-    }
-
-    /* --- Review header (make it standout) --- */
-    .reviewHead{
-      border: 1px solid rgba(215,181,109,.35);
-      background: rgba(215,181,109,.08);
-      border-radius: 16px;
-      padding: 12px 12px;
-    }
-    .reviewHead .h1{
-      font-size: 16px;
-      font-weight: 900;
-      letter-spacing: .2px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      margin:0 0 6px;
-    }
-    .reviewHead .desc{
-      font-size: 12px;
-      color: var(--muted);
-      margin:0;
-      line-height: 1.6;
-    }
-    .hr{
-      height:1px;
-      background: rgba(255,255,255,.10);
-      margin: 10px 0;
-    }
   </style>
 </head>
 
@@ -328,7 +361,8 @@
     </header>
 
     <main class="grid">
-      <!-- Left: Sake Sheet -->
+
+      <!-- ✅ Bottle page: ONE CARD (A) -->
       <section class="card" id="sheetCard" style="display:none;">
         <div class="hd">
           <div class="title">
@@ -339,6 +373,7 @@
         </div>
 
         <div class="body">
+          <!-- ① Specまで：現状維持 -->
           <div class="row">
             <div class="kpi">
               <div class="k"><span>蔵 / Brewery</span><span class="muted">JP/EN</span></div>
@@ -357,15 +392,17 @@
             </div>
           </div>
 
-          <table class="table" aria-label="Sake quick table">
-            <tr><th>香り / Aroma</th><td id="aroma">—</td></tr>
-            <tr><th>味わい / Palate</th><td id="palate">—</td></tr>
-            <tr><th>相性 / Pairing</th><td id="pairing">—</td></tr>
-            <tr><th>温度 / Temp</th><td id="temp">—</td></tr>
-            <tr><th>グラス / Glass</th><td id="glass">—</td></tr>
-            <tr><th>ひと言 / One-liner</th><td id="copy">—</td></tr>
-          </table>
+          <!-- ② Map (🗾 Origin / 産地) -->
+          <div class="mapbox">
+            <div class="caption">
+              <span>🗾 Origin / 産地</span>
+              <span class="muted" id="mapMeta">—</span>
+            </div>
+            <div class="mapwrap" id="mapWrap"></div>
+            <div class="hint muted">※ 県をハイライト表示（壊れにくいSVG）</div>
+          </div>
 
+          <!-- ③ Story -->
           <div class="story">
             <div class="h">
               <span>📖 Story / ストーリー</span>
@@ -374,6 +411,109 @@
             <div class="p" id="storyText">—</div>
           </div>
 
+          <!-- ④ テイスティング見出し -->
+          <div class="sectionTitle">
+            <span>テイスティング / Tasting</span>
+            <span class="sub"><span class="tag" id="idTag">id: —</span></span>
+          </div>
+
+          <!-- ⑤ Aroma / Palate / Pairing（Temp/Glass/One-linerは外す） -->
+          <table class="table" aria-label="Sake quick table">
+            <tr><th>香り / Aroma</th><td id="aroma">—</td></tr>
+            <tr><th>味わい / Palate</th><td id="palate">—</td></tr>
+            <tr><th>相性 / Pairing</th><td id="pairing">—</td></tr>
+          </table>
+
+          <!-- ⑥ Parameters -->
+          <div class="sectionTitle" style="margin-top:16px;">
+            <span>パラメーター / Parameters</span>
+            <span class="sub">0–5</span>
+          </div>
+
+          <div class="bar">
+            <div class="label">甘さ / Sweet</div>
+            <div class="track"><div class="fill" id="bar_sweet"></div></div>
+            <div class="val" id="val_sweet">—</div>
+          </div>
+          <div class="bar">
+            <div class="label">香り / Aroma</div>
+            <div class="track"><div class="fill" id="bar_aroma"></div></div>
+            <div class="val" id="val_aroma">—</div>
+          </div>
+          <div class="bar">
+            <div class="label">コク / Body</div>
+            <div class="track"><div class="fill" id="bar_body"></div></div>
+            <div class="val" id="val_body">—</div>
+          </div>
+          <div class="bar">
+            <div class="label">酸 / Acidity</div>
+            <div class="track"><div class="fill" id="bar_acid"></div></div>
+            <div class="val" id="val_acid">—</div>
+          </div>
+
+          <!-- ⑦ Taste Compass -->
+          <div class="chart">
+            <div class="caption">
+              <span>🧭 Taste Compass / 味の羅針盤</span>
+              <span class="muted">0–5</span>
+            </div>
+            <div class="svgwrap" id="tasteSvgWrap"></div>
+            <div class="hint muted">※ CSV: (sweet, aroma_intensity, body, acidity)</div>
+          </div>
+
+          <!-- ⑧ Reviews（説明文に英訳） -->
+          <div class="reviewHead">
+            <div class="h1">
+              <span>✍️ Reviews / 感想を書く・読む</span>
+              <span class="badge" id="ratingBadge">—</span>
+            </div>
+            <p class="desc">
+              初回は「お名前」を入れて投稿すると、その名前がこの端末に保存されます（面倒な会員登録なし）。<br/>
+              次に別のQRを読んでも同じ名前で続けて投稿できます。投稿したレビューは店内の全員に表示されます。<br/>
+              <span class="muted">
+                Your name is saved on this device after your first post (no sign-up needed).<br/>
+                You can keep posting with the same name even after scanning another QR. Reviews are visible to everyone in the store.
+              </span>
+            </p>
+          </div>
+
+          <div class="reviews" id="reviews"></div>
+
+          <!-- ⑨ 星の統計（badge）＋投稿フォーム -->
+          <div class="form" aria-label="Review form">
+            <div class="formgrid">
+              <div>
+                <div class="muted" style="font-size:12px; margin:0 0 6px;">Name / お名前（初回のみ）</div>
+                <input id="rv_name" placeholder="e.g. Alex / アレックス" maxlength="30" />
+              </div>
+              <div>
+                <div class="muted" style="font-size:12px; margin:0 0 6px;">Rating / 評価</div>
+                <select id="rv_rating">
+                  <option value="5">★★★★★ (5)</option>
+                  <option value="4">★★★★☆ (4)</option>
+                  <option value="3">★★★☆☆ (3)</option>
+                  <option value="2">★★☆☆☆ (2)</option>
+                  <option value="1">★☆☆☆☆ (1)</option>
+                </select>
+              </div>
+            </div>
+            <div style="margin-top:10px;">
+              <div class="muted" style="font-size:12px; margin:0 0 6px;">Comment / コメント</div>
+              <textarea id="rv_msg" placeholder="Short impressions / ひとこと感想（短め推奨）" maxlength="240"></textarea>
+            </div>
+            <div class="actions" style="margin-top:10px;">
+              <button id="submitReviewBtn" type="button">投稿する / Post</button>
+              <button class="secondary" id="exportReviewsBtn" type="button">⬇️ Export JSON</button>
+            </div>
+            <div class="hint muted">
+              ※ 投稿後、この銘柄は「My Page（履歴）」に自動で追加されます。<br/>
+              After posting, this bottle will be added to “My Page (History)” automatically.
+            </div>
+          </div>
+
+          <div class="hr"></div>
+
+          <!-- ⑩ My page ボタン（最後） -->
           <div class="actions">
             <a class="btn secondary" id="myPageBtn" href="./index.html">⭐ My Page / 履歴を見る</a>
           </div>
@@ -386,112 +526,8 @@
         </div>
       </section>
 
-      <!-- Right: Map + Taste + Reviews -->
-      <aside class="card" id="sideCard" style="display:none;">
-        <div class="hd">
-          <div class="title">
-            <div class="jp">テイスティング / Tasting</div>
-            <div class="en">Origin map + taste guide + reviews</div>
-          </div>
-          <div class="tags">
-            <span class="tag" id="idTag">id: —</span>
-          </div>
-        </div>
-
-        <div class="body">
-          <div class="viz">
-            <!-- Map -->
-            <div class="mapbox">
-              <div class="caption">
-                <span>🗾 Origin / 産地</span>
-                <span class="muted" id="mapMeta">—</span>
-              </div>
-              <div class="mapwrap" id="mapWrap"></div>
-              <div class="hint muted">※ 県をハイライト表示（壊れにくいSVG）</div>
-            </div>
-
-            <!-- Bars -->
-            <div class="bar">
-              <div class="label">甘辛 / Sweet-Dry</div>
-              <div class="track"><div class="fill" id="bar_sweet"></div></div>
-              <div class="val" id="val_sweet">—</div>
-            </div>
-            <div class="bar">
-              <div class="label">香り / Aroma</div>
-              <div class="track"><div class="fill" id="bar_aroma"></div></div>
-              <div class="val" id="val_aroma">—</div>
-            </div>
-            <div class="bar">
-              <div class="label">コク / Body</div>
-              <div class="track"><div class="fill" id="bar_body"></div></div>
-              <div class="val" id="val_body">—</div>
-            </div>
-            <div class="bar">
-              <div class="label">酸 / Acidity</div>
-              <div class="track"><div class="fill" id="bar_acid"></div></div>
-              <div class="val" id="val_acid">—</div>
-            </div>
-
-            <!-- Taste compass -->
-            <div class="chart">
-              <div class="caption">
-                <span>🧭 Taste Compass / 味の羅針盤</span>
-                <span class="muted">0–5</span>
-              </div>
-              <div class="svgwrap" id="tasteSvgWrap"></div>
-              <div class="hint muted">※ CSV: (sweet, aroma_intensity, body, acidity)</div>
-            </div>
-
-            <!-- Reviews -->
-            <div class="reviewHead">
-              <div class="h1">
-                <span>✍️ Reviews / 感想を書く・読む</span>
-                <span class="badge" id="ratingBadge">—</span>
-              </div>
-              <p class="desc">
-                初回は「お名前」を入れて投稿すると、その名前がこの端末に保存されます（面倒な会員登録なし）。<br/>
-                次に別のQRを読んでも同じ名前で続けて投稿できます。投稿したレビューは店内の全員に表示されます。
-              </p>
-            </div>
-
-            <div class="reviews" id="reviews"></div>
-
-            <div class="form" aria-label="Review form">
-              <div class="formgrid">
-                <div>
-                  <div class="muted" style="font-size:12px; margin:0 0 6px;">Name / お名前（初回のみ）</div>
-                  <input id="rv_name" placeholder="e.g. Alex / アレックス" maxlength="30" />
-                </div>
-                <div>
-                  <div class="muted" style="font-size:12px; margin:0 0 6px;">Rating / 評価</div>
-                  <select id="rv_rating">
-                    <option value="5">★★★★★ (5)</option>
-                    <option value="4">★★★★☆ (4)</option>
-                    <option value="3">★★★☆☆ (3)</option>
-                    <option value="2">★★☆☆☆ (2)</option>
-                    <option value="1">★☆☆☆☆ (1)</option>
-                  </select>
-                </div>
-              </div>
-              <div style="margin-top:10px;">
-                <div class="muted" style="font-size:12px; margin:0 0 6px;">Comment / コメント</div>
-                <textarea id="rv_msg" placeholder="Short impressions / ひとこと感想（短め推奨）" maxlength="240"></textarea>
-              </div>
-              <div class="actions" style="margin-top:10px;">
-                <button id="submitReviewBtn" type="button">投稿する / Post</button>
-                <button class="secondary" id="exportReviewsBtn" type="button">⬇️ Export JSON</button>
-              </div>
-              <div class="hint muted">
-                ※ 投稿後、この銘柄は「My Page（履歴）」に自動で追加されます。
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </aside>
-
       <!-- My Page (when no ?id) -->
-      <section class="card" id="listCard" style="display:none; grid-column: 1 / -1;">
+      <section class="card" id="listCard" style="display:none;">
         <div class="hd">
           <div class="title">
             <div class="jp">My Page / 履歴</div>
@@ -510,7 +546,11 @@
             </div>
             <p class="desc">
               ここには「この端末でレビュー投稿した銘柄」が自動で溜まります。<br/>
-              QRで個別ページに行き、レビューを投稿すると履歴に追加されます（端末ごとに保存）。
+              QRで個別ページに行き、レビューを投稿すると履歴に追加されます（端末ごとに保存）。<br/>
+              <span class="muted">
+                This page shows bottles you reviewed on this device.<br/>
+                Scan a QR → post a review → it will be added here (saved per device).
+              </span>
             </p>
             <div class="actions" style="margin-top:10px;">
               <button class="secondary" id="changeNameBtn" type="button">名前を変更 / Change name</button>
@@ -529,6 +569,7 @@
           <div class="hint muted">※ 個別ページは <span class="muted">?id=xxxx</span> で開きます。</div>
         </div>
       </section>
+
     </main>
   </div>
 
@@ -605,6 +646,10 @@
         if (s) return s;
       }
       return "";
+    }
+    function setText(id, value){
+      const el = document.getElementById(id);
+      if (el) el.textContent = value ?? "—";
     }
 
     // ---------- Auth (Anonymous) + displayName ----------
@@ -727,14 +772,14 @@
           <polygon points="${pTop.join(",")} ${pRight.join(",")} ${pBottom.join(",")} ${pLeft.join(",")}"
                    fill="rgba(215,181,109,.25)" stroke="rgba(215,181,109,.75)" stroke-width="2"/>
           <text x="${cx}" y="${cy-r-8}" text-anchor="middle" font-size="11" fill="rgba(255,255,255,.70)">Aroma</text>
-          <text x="${cx+r+8}" y="${cy+4}" text-anchor="start" font-size="11" fill="rgba(255,255,255,.70)">Sweet/Dry</text>
+          <text x="${cx+r+8}" y="${cy+4}" text-anchor="start" font-size="11" fill="rgba(255,255,255,.70)">Sweet</text>
           <text x="${cx}" y="${cy+r+18}" text-anchor="middle" font-size="11" fill="rgba(255,255,255,.70)">Body</text>
           <text x="${cx-r-8}" y="${cy+4}" text-anchor="end" font-size="11" fill="rgba(255,255,255,.70)">Acidity</text>
         </svg>
       `;
     }
 
-    // ---------- Japan SVG Map (Geolonia prefecture svg 対応) ----------
+    // ---------- Japan SVG Map ----------
     function prefectureFromRegionJP(regionJP){
       const s = String(regionJP||"").trim();
       const m = s.match(/(北海道|東京都|..府|..県)/);
@@ -784,7 +829,6 @@
       if(!svg) throw new Error("SVG not found inside mapWrap");
 
       markPrefShapes(svg);
-
       japanSvgEl = svg;
       return svg;
     }
@@ -793,10 +837,7 @@
       if(!svg || !prefJpWithSuffix) return null;
 
       const prefShort = prefJpWithSuffix
-        .replace("都","")
-        .replace("道","")
-        .replace("府","")
-        .replace("県","");
+        .replace("都","").replace("道","").replace("府","").replace("県","");
 
       const cls = PREF_JP_TO_CLASS[prefJpWithSuffix];
       if (cls){
@@ -915,6 +956,7 @@
 
     function renderReviewsShared(list){
       const box = document.getElementById("reviews");
+      if(!box) return;
       box.innerHTML = "";
 
       if (!list || list.length === 0){
@@ -970,28 +1012,27 @@
     }
 
     function myReviewDocId(sakeId, uid){
-  return `${String(sakeId).slice(0,60)}_${String(uid).slice(0,80)}`;
-}
+      return `${String(sakeId).slice(0,60)}_${String(uid).slice(0,80)}`;
+    }
 
     async function postReviewShared(sakeId, {name, rating, msg}){
-    me = me || await ensureAnonAuth();
-    if (!db) throw new Error("Firestore not ready");
+      me = me || await ensureAnonAuth();
+      if (!db) throw new Error("Firestore not ready");
 
-    const clean = {
+      const clean = {
         sakeId: String(sakeId || "").slice(0, 60),
         name: String(name || "Guest").trim().slice(0, 30),
         rating: Math.max(1, Math.min(5, Number(rating)||5)),
         msg: String(msg || "").trim().slice(0, 240),
         ts: firebase.firestore.FieldValue.serverTimestamp(),
         uid: String(me?.uid || "anon").slice(0, 80),
-    };
-    if (!clean.msg) throw new Error("Empty message");
+      };
+      if (!clean.msg) throw new Error("Empty message");
 
-    const docId = myReviewDocId(clean.sakeId, me.uid);
+      const docId = myReviewDocId(clean.sakeId, me.uid);
 
-    // docId固定で「1回だけ投稿」になる
-    // 既に存在すると Rules で create が拒否される（＝二重投稿防止）
-    await db.collection(REVIEWS_COLLECTION).doc(docId).set(clean);
+      // docId固定で「1回だけ投稿」になる
+      await db.collection(REVIEWS_COLLECTION).doc(docId).set(clean);
     }
 
     async function markReviewed(sakeId, bottleMeta){
@@ -1062,12 +1103,12 @@
       window.__currentBottleMeta = it;
 
       currentSakeId = it.id;
-      document.getElementById("sheetCard").style.display = "";
-      document.getElementById("sideCard").style.display = "";
 
-      document.getElementById("name_jp").textContent = it.name_jp || it.id || "—";
-      document.getElementById("name_en").textContent = it.name_en || "";
-      document.getElementById("idTag").textContent = `id: ${it.id || "—"}`;
+      document.getElementById("sheetCard").style.display = "";
+
+      setText("name_jp", it.name_jp || it.id || "—");
+      setText("name_en", it.name_en || "");
+      setText("idTag", `id: ${it.id || "—"}`);
 
       const tags = document.getElementById("tags");
       tags.innerHTML = "";
@@ -1083,39 +1124,37 @@
         tags.appendChild(s);
       });
 
-      document.getElementById("brewery").textContent = jpOrEn(it.brewery_jp, it.brewery_en);
-      document.getElementById("region").textContent  = jpOrEn(it.region_jp, it.region_en);
+      setText("brewery", jpOrEn(it.brewery_jp, it.brewery_en));
+      setText("region",  jpOrEn(it.region_jp, it.region_en));
 
-      document.getElementById("style").textContent   = jpOrEn(it.style_jp, it.style_en);
-      document.getElementById("rice").textContent    = jpOrEn(it.rice_jp, it.rice_en);
+      setText("style",   jpOrEn(it.style_jp, it.style_en));
+      setText("rice",    jpOrEn(it.rice_jp, it.rice_en));
 
       const abv = it.abv ? `${it.abv}%` : "";
       const smv = it.smv ? `SMV ${it.smv}` : "";
       const acidityValue = it.acidity_value ? `Acidity ${it.acidity_value}` : "";
-      document.getElementById("spec").textContent = [abv, smv, acidityValue].filter(Boolean).join(" · ") || "—";
-      document.getElementById("polish").textContent = it.rice_polish ? `Rice polish ${it.rice_polish}%` : "—";
+      setText("spec", [abv, smv, acidityValue].filter(Boolean).join(" · ") || "—");
+      setText("polish", it.rice_polish ? `Rice polish ${it.rice_polish}%` : "—");
 
-      document.getElementById("aroma").textContent   = jpOrEn(it.aroma_jp, it.aroma_en);
-      document.getElementById("palate").textContent  = jpOrEn(it.palate_jp, it.palate_en);
-      document.getElementById("pairing").textContent = jpOrEn(it.pairing_jp, it.pairing_en);
-      document.getElementById("temp").textContent    = jpOrEn(it.temp_jp, it.temp_en);
-      document.getElementById("glass").textContent   = jpOrEn(it.glass_jp, it.glass_en);
-      document.getElementById("copy").textContent    = jpOrEn(it.copy_jp, it.copy_en);
+      setText("aroma",   jpOrEn(it.aroma_jp, it.aroma_en));
+      setText("palate",  jpOrEn(it.palate_jp, it.palate_en));
+      setText("pairing", jpOrEn(it.pairing_jp, it.pairing_en));
 
-      document.getElementById("storyText").textContent = buildStory(it);
-      document.getElementById("storyHint").textContent = "auto";
+      setText("storyText", buildStory(it));
+      setText("storyHint", "auto");
 
       const sweet = setBar("bar_sweet", it.sweet);
       const aroma = setBar("bar_aroma", it.aroma_intensity);
       const body  = setBar("bar_body",  it.body);
       const acid  = setBar("bar_acid",  it.acidity);
 
-      document.getElementById("val_sweet").textContent = sweet.toFixed(0);
-      document.getElementById("val_aroma").textContent = aroma.toFixed(0);
-      document.getElementById("val_body").textContent  = body.toFixed(0);
-      document.getElementById("val_acid").textContent  = acid.toFixed(0);
+      setText("val_sweet", sweet.toFixed(0));
+      setText("val_aroma", aroma.toFixed(0));
+      setText("val_body",  body.toFixed(0));
+      setText("val_acid",  acid.toFixed(0));
 
-      document.getElementById("tasteSvgWrap").innerHTML = tasteSvg({sweet, aroma, body, acid});
+      const tasteWrap = document.getElementById("tasteSvgWrap");
+      if (tasteWrap) tasteWrap.innerHTML = tasteSvg({sweet, aroma, body, acid});
 
       const pref = prefectureFromRegionJP(it.region_jp || "");
       highlightPrefOnMap(pref);
@@ -1137,58 +1176,56 @@
       listenReviewsShared(it.id);
 
       // Post button
-      document.getElementById("submitReviewBtn").onclick = async () => {
-        try{
-          me = me || await ensureAnonAuth();
-          setMeTag();
+      const submitBtn = document.getElementById("submitReviewBtn");
+      if (submitBtn){
+        submitBtn.onclick = async () => {
+          try{
+            me = me || await ensureAnonAuth();
+            setMeTag();
 
-          // 1) input
-          let name = (document.getElementById("rv_name").value || "").trim();
-          const rating = Number(document.getElementById("rv_rating").value || 5);
-          const msg = document.getElementById("rv_msg").value || "";
+            let name = (document.getElementById("rv_name").value || "").trim();
+            const rating = Number(document.getElementById("rv_rating").value || 5);
+            const msg = document.getElementById("rv_msg").value || "";
 
-          // 2) if empty, try saved name; else ask to input
-          if (!name){
-            const prof = await loadMyProfile();
-            if (prof.displayName){
-              name = prof.displayName;
-              document.getElementById("rv_name").value = name;
-            }else{
-              statusEl.textContent = "Please enter your name first / お名前を入れてください";
-              document.getElementById("rv_name").focus();
-              return;
+            if (!name){
+              const prof = await loadMyProfile();
+              if (prof.displayName){
+                name = prof.displayName;
+                document.getElementById("rv_name").value = name;
+              }else{
+                statusEl.textContent = "Please enter your name first / お名前を入れてください";
+                document.getElementById("rv_name").focus();
+                return;
+              }
+            }
+
+            await saveMyDisplayName(name);
+            await postReviewShared(currentSakeId, { name, rating, msg });
+            await markReviewed(currentSakeId, window.__currentBottleMeta || null);
+
+            document.getElementById("rv_msg").value = "";
+            statusEl.textContent = "Posted ✅ / 投稿しました";
+          }catch(err){
+            console.error(err);
+            const code = err?.code || "";
+            const m  = err?.message ? err.message : String(err);
+
+            if (code === "permission-denied" || /permission/i.test(m)) {
+              statusEl.textContent = "You already posted a review for this bottle. / この銘柄のレビューは1回までです（修正はスタッフにお声がけください）";
+            } else {
+              statusEl.textContent = `Post failed${code ? ` (${code})` : ""}: ${m}`;
             }
           }
-
-          // 3) save name (registration)
-          await saveMyDisplayName(name);
-
-          // 4) post
-          await postReviewShared(currentSakeId, { name, rating, msg });
-
-          // 5) mark reviewed (my history)
-          await markReviewed(currentSakeId, window.__currentBottleMeta || null);
-
-          document.getElementById("rv_msg").value = "";
-          statusEl.textContent = "Posted ✅ / 投稿しました";
-        }catch(err){
-        console.error(err);
-        const code = err?.code || "";
-        const m  = err?.message ? err.message : String(err);
-
-        // 二重投稿時は permission-denied になりやすいのでメッセージを友好的に
-        if (code === "permission-denied" || /permission/i.test(m)) {
-            statusEl.textContent = "You already posted a review for this bottle. / この銘柄のレビューは1回までです（修正はスタッフにお声がけください）";
-        } else {
-            statusEl.textContent = `Post failed${code ? ` (${code})` : ""}: ${m}`;
-        }
-        }
         };
+      }
 
-      document.getElementById("exportReviewsBtn").onclick = () => {
-        exportReviewsJSON();
-        statusEl.textContent = "Exported ✅ / 書き出しました";
-      };
+      const exportBtn = document.getElementById("exportReviewsBtn");
+      if (exportBtn){
+        exportBtn.onclick = () => {
+          exportReviewsJSON();
+          statusEl.textContent = "Exported ✅ / 書き出しました";
+        };
+      }
     }
 
     async function main(){
@@ -1200,12 +1237,11 @@
           });
         }
 
-        // ✅ auto anonymous login (always)
+        // auto anonymous login (always)
         try{
           me = await ensureAnonAuth();
           setMeTag();
 
-          // restore saved name into form (if exists)
           const prof = await loadMyProfile();
           if (prof.displayName){
             const nameEl = document.getElementById("rv_name");
@@ -1239,13 +1275,11 @@
         if(!targetId){
           document.getElementById("listCard").style.display = "";
 
-          // My name badge
           try{
             const prof = await loadMyProfile();
             setMyNameBadge(prof.displayName || "");
           }catch(_){}
 
-          // Change name (only affects future posts)
           const changeBtn = document.getElementById("changeNameBtn");
           if (changeBtn){
             changeBtn.onclick = async () => {
@@ -1269,7 +1303,6 @@
             };
           }
 
-          // Load my reviewed history
           try{
             me = me || await ensureAnonAuth();
             const reviewed = await loadMyReviewed();
@@ -1279,7 +1312,6 @@
             renderMyReviewedSection([]);
           }
 
-          // Staff list
           document.getElementById("countTag").textContent = `${items.length} bottles`;
           renderAllBottles(items);
           return;
