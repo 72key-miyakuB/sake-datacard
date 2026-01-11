@@ -656,10 +656,20 @@
     const LS_NAME_KEY = "tsc_displayName";
 
     async function ensureAnonAuth(){
-      if(!auth) throw new Error("Auth not ready");
-      if(auth.currentUser) return auth.currentUser;
-      const cred = await auth.signInAnonymously();
-      return cred.user;
+    if(!auth) throw new Error("Auth not ready");
+
+    if (auth.currentUser) return auth.currentUser;
+
+    const cred = await auth.signInAnonymously();
+
+    // auth state が反映されるまで待つ（重要）
+    await new Promise(resolve => {
+        const unsub = auth.onAuthStateChanged(u => {
+        if (u) { unsub(); resolve(); }
+        });
+    });
+
+    return auth.currentUser;
     }
 
     function setMeTag(){
