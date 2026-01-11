@@ -347,6 +347,80 @@
     .item .n{ font-weight: 820; }
     .item .s{ color: var(--muted); font-size: 12px; }
     .item .go{ margin-top:auto; display:flex; gap:10px; flex-wrap:wrap; }
+
+    /* Rating summary / distribution */
+    .ratingTop{
+    display:flex; gap:12px; align-items:flex-start; justify-content:space-between;
+    flex-wrap:wrap;
+    }
+    .ratingBig{
+    display:flex; flex-direction:column; gap:2px;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: rgba(0,0,0,.12);
+    min-width: 180px;
+    }
+    .ratingAvg{
+    font-size: 28px;
+    font-weight: 920;
+    letter-spacing: .2px;
+    line-height: 1.1;
+    }
+    .ratingMeta{
+    font-size: 12px;
+    color: var(--muted);
+    }
+    .ratingSide{
+    flex:1;
+    min-width: 180px;
+    display:flex; flex-direction:column; gap:6px;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: rgba(0,0,0,.10);
+    }
+    .ratingLine{
+    display:flex; justify-content:space-between; gap:10px;
+    font-size: 12px;
+    color: rgba(255,255,255,.86);
+    }
+
+    .dist{
+    margin-top: 10px;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    }
+    .distRow{
+    display:grid;
+    grid-template-columns: 18px 1fr 60px;
+    gap:10px;
+    align-items:center;
+    }
+    .distLbl{
+    font-size: 12px;
+    color: var(--muted);
+    text-align:right;
+    }
+    .distBar{
+    height: 10px;
+    border-radius: 999px;
+    background: rgba(255,255,255,.08);
+    border: 1px solid rgba(255,255,255,.08);
+    overflow:hidden;
+    }
+    .distBar i{
+    display:block;
+    height:100%;
+    width:0%;
+    background: linear-gradient(90deg, rgba(215,181,109,.95), rgba(126,227,166,.85));
+    }
+    .distVal{
+    font-size: 12px;
+    color: var(--muted);
+    text-align:right;
+    }
   </style>
 </head>
 
@@ -466,6 +540,31 @@
             <div class="h1">
               <span>✍️ Reviews / 感想を書く・読む</span>
               <span class="badge" id="ratingBadge">—</span>
+              <div class="ratingSummary" id="ratingSummary" style="margin-top:10px;">
+                <div class="ratingTop">
+                  <div class="ratingBig">
+                    <div class="ratingAvg" id="avgBig">—</div>
+                    <div class="ratingMeta" id="countBig">—</div>
+                  </div>
+                  <div class="ratingSide">
+                    <div class="ratingLine"><span class="muted">★4–5率</span><span id="pct45">—</span></div>
+                    <div class="ratingLine"><span class="muted">★1–2率</span><span id="pct12">—</span></div>
+                    <div class="ratingLine"><span class="muted">最多</span><span id="modeStar">—</span></div>
+                  </div>
+                </div>
+              
+                <div class="dist" aria-label="Rating distribution">
+                  <!-- ★5 → ★1 の順 -->
+                  <div class="distRow"><span class="distLbl">5</span><div class="distBar"><i id="bar5"></i></div><span class="distVal" id="val5">—</span></div>
+                  <div class="distRow"><span class="distLbl">4</span><div class="distBar"><i id="bar4"></i></div><span class="distVal" id="val4">—</span></div>
+                  <div class="distRow"><span class="distLbl">3</span><div class="distBar"><i id="bar3"></i></div><span class="distVal" id="val3">—</span></div>
+                  <div class="distRow"><span class="distLbl">2</span><div class="distBar"><i id="bar2"></i></div><span class="distVal" id="val2">—</span></div>
+                  <div class="distRow"><span class="distLbl">1</span><div class="distBar"><i id="bar1"></i></div><span class="distVal" id="val1">—</span></div>
+                </div>
+              
+                <div class="hint muted" style="margin-top:8px;">※ 分布はこの銘柄の全レビュー（共有）から集計</div>
+              </div>
+              
             </div>
             <p class="desc">
               初回は「お名前」を入れて投稿すると、その名前がこの端末に保存されます（面倒な会員登録なし）。<br/>
@@ -998,12 +1097,75 @@
       };
     }
 
-    function setRatingBadge(avg, count){
-      const b = document.getElementById("ratingBadge");
-      if (!b) return;
-      if (!count){ b.textContent = "—"; return; }
-      b.textContent = `★ ${avg.toFixed(1)} / 5  (${count})`;
-    }
+    function fmtPct(x){
+  if (!Number.isFinite(x)) return "—";
+  return `${Math.round(x*100)}%`;
+}
+
+function setDistributionUI(list){
+  const count = list.length;
+  const avg = count ? (list.reduce((a,b)=>a+(b.rating||0),0) / count) : 0;
+
+  // counts: index=star (1..5)
+  const c = {1:0,2:0,3:0,4:0,5:0};
+  for(const r of list){
+    const k = Math.max(1, Math.min(5, Number(r.rating)||0));
+    c[k] = (c[k]||0) + 1;
+  }
+
+  // mode (most frequent)
+  let mode = 0, modeCnt = -1;
+  for (let k=5;k>=1;k--){
+    const v = c[k]||0;
+    if (v > modeCnt){ modeCnt = v; mode = k; }
+  }
+
+  // key ratios
+  const pct45 = count ? ( (c[4]+c[5]) / count ) : 0;
+  const pct12 = count ? ( (c[1]+c[2]) / count ) : 0;
+
+  // big blocks
+  const avgBig = document.getElementById("avgBig");
+  const countBig = document.getElementById("countBig");
+  const pct45El = document.getElementById("pct45");
+  const pct12El = document.getElementById("pct12");
+  const modeEl  = document.getElementById("modeStar");
+
+  if (avgBig) avgBig.textContent = count ? `★ ${avg.toFixed(1)}` : "—";
+  if (countBig) countBig.textContent = count ? `${count} reviews` : "—";
+  if (pct45El) pct45El.textContent = count ? fmtPct(pct45) : "—";
+  if (pct12El) pct12El.textContent = count ? fmtPct(pct12) : "—";
+  if (modeEl)  modeEl.textContent  = count ? `★${mode}` : "—";
+
+  // badge (existing)
+  const badge = document.getElementById("ratingBadge");
+  if (badge) badge.textContent = count ? `★ ${avg.toFixed(1)} / 5  (${count})` : "—";
+
+  // distribution bars (normalize by max bucket)
+  const maxBucket = Math.max(c[1],c[2],c[3],c[4],c[5], 1);
+
+  function setBarRow(star){
+    const bar = document.getElementById(`bar${star}`);
+    const val = document.getElementById(`val${star}`);
+    const n = c[star] || 0;
+    const pct = (n / maxBucket) * 100; // relative bar length
+    if (bar) bar.style.width = `${pct}%`;
+    if (val) val.textContent = count ? `${n} (${Math.round((n/count)*100)}%)` : "—";
+  }
+
+  [5,4,3,2,1].forEach(setBarRow);
+}
+
+function setRatingBadge(avg, count){
+  // 旧互換：renderReviewsSharedから呼ばれてもOKにする
+  // ここではUI全体は list から描画するので no-op でも良いが、
+  // 念のため badge を更新
+  const b = document.getElementById("ratingBadge");
+  if (!b) return;
+  if (!count){ b.textContent = "—"; return; }
+  b.textContent = `★ ${avg.toFixed(1)} / 5  (${count})`;
+}
+
 
     function renderReviewsShared(list){
       const box = document.getElementById("reviews");
@@ -1019,6 +1181,7 @@
       const sum = list.reduce((a,b)=>a+(b.rating||0),0);
       const avg = sum / list.length;
       setRatingBadge(avg, list.length);
+      setDistributionUI(list);
 
       list.forEach(r => {
         const el = document.createElement("div");
