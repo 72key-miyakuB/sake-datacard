@@ -558,6 +558,19 @@
             <div class="hint muted">※ 名前を変えると次回以降の投稿名が変わります（過去レビューの表示名は変わりません）。</div>
           </div>
 
+          <!-- ✅ My Page Map (塗りつぶし) -->
+          <div class="mapbox" style="margin: 12px 0;">
+            <div class="caption">
+              <span>🗾 Origin Map / 産地マップ（あなたの履歴）</span>
+              <span class="muted" id="myMapMeta">—</span>
+            </div>
+            <div class="mapwrap" id="myMapWrap"></div>
+            <div class="hint muted">
+              レビューした銘柄の「産地（都道府県）」が塗りつぶされます。<br/>
+              Prefectures you reviewed will be highlighted on the map.
+            </div>
+          </div>
+
           <div class="badge">✍️ My Reviews / レビューした銘柄</div>
           <div class="list" id="myReviewedList" style="margin-top:10px;"></div>
 
@@ -656,20 +669,19 @@
     const LS_NAME_KEY = "tsc_displayName";
 
     async function ensureAnonAuth(){
-    if(!auth) throw new Error("Auth not ready");
+      if(!auth) throw new Error("Auth not ready");
+      if (auth.currentUser) return auth.currentUser;
 
-    if (auth.currentUser) return auth.currentUser;
+      const cred = await auth.signInAnonymously();
 
-    const cred = await auth.signInAnonymously();
-
-    // auth state が反映されるまで待つ（重要）
-    await new Promise(resolve => {
+      // auth state が反映されるまで待つ（重要）
+      await new Promise(resolve => {
         const unsub = auth.onAuthStateChanged(u => {
-        if (u) { unsub(); resolve(); }
+          if (u) { unsub(); resolve(); }
         });
-    });
+      });
 
-    return auth.currentUser;
+      return auth.currentUser;
     }
 
     function setMeTag(){
@@ -790,6 +802,7 @@
     }
 
     // ---------- Japan SVG Map ----------
+    // region_jp から "○○県/○○府/東京都/北海道" を抽出
     function prefectureFromRegionJP(regionJP){
       const s = String(regionJP||"").trim();
       const m = s.match(/(北海道|東京都|..府|..県)/);
@@ -808,7 +821,8 @@
       "鹿児島県":"kagoshima","沖縄県":"okinawa",
     };
 
-    let japanSvgEl = null;
+    // ✅ 複数の地図（mapWrap / myMapWrap）を持てるようにする
+    let japanSvgByWrapId = {}; // { mapWrap: svgEl, myMapWrap: svgEl }
 
     function getPrefGroups(svg){
       return Array.from(svg.querySelectorAll("g.prefecture"));
@@ -827,19 +841,22 @@
       });
     }
 
-    async function loadJapanMapSvg(){
+    // ✅ 任意のwrapIdへSVGを流し込む（mapWrap / myMapWrap 両対応）
+    async function loadJapanMapSvgInto(wrapId){
+      const wrap = document.getElementById(wrapId);
+      if(!wrap) return null;
+
       const res = await fetch(JAPAN_SVG_PATH, { cache: "no-store" });
       if(!res.ok) throw new Error("SVG fetch failed: " + res.status);
       const svgText = await res.text();
 
-      const wrap = document.getElementById("mapWrap");
       wrap.innerHTML = svgText;
 
       const svg = wrap.querySelector("svg");
-      if(!svg) throw new Error("SVG not found inside mapWrap");
+      if(!svg) throw new Error("SVG not found inside " + wrapId);
 
       markPrefShapes(svg);
-      japanSvgEl = svg;
+      japanSvgByWrapId[wrapId] = svg;
       return svg;
     }
 
@@ -865,12 +882,9 @@
       return null;
     }
 
-    function highlightPrefOnMap(prefJp){
-      const meta = document.getElementById("mapMeta");
-      if(meta) meta.textContent = prefJp || "—";
-
-      if(!japanSvgEl) return;
-      const svg = japanSvgEl;
+    // ✅ 1県だけハイライト（個別ページ用）
+    function highlightPrefOnMap(svg, prefJp){
+      if(!svg) return;
 
       svg.querySelectorAll(".pref").forEach(el=>{
         el.classList.remove("active");
@@ -891,6 +905,33 @@
         shape.classList.remove("dim");
         shape.classList.add("active");
       });
+    }
+
+    // ✅ 複数県をまとめて塗る（My Page用）
+    function highlightPrefsOnMap(svg, prefList){
+      if(!svg) return;
+
+      svg.querySelectorAll(".pref").forEach(el=>{
+        el.classList.remove("active");
+        el.classList.remove("dim");
+      });
+
+      const prefs = Array.from(new Set((prefList || []).filter(Boolean)));
+      if(prefs.length === 0) return;
+
+      svg.querySelectorAll(".pref").forEach(el=> el.classList.add("dim"));
+
+      for(const prefJp of prefs){
+        const group = findPrefGroup(svg, prefJp);
+        if(!group){
+          console.warn("Map: prefecture not matched:", prefJp);
+          continue;
+        }
+        group.querySelectorAll("path.pref, polygon.pref").forEach(shape=>{
+          shape.classList.remove("dim");
+          shape.classList.add("active");
+        });
+      }
     }
 
     // ---------- My reviewed list ----------
@@ -1167,7 +1208,12 @@
       if (tasteWrap) tasteWrap.innerHTML = tasteSvg({sweet, aroma, body, acid});
 
       const pref = prefectureFromRegionJP(it.region_jp || "");
-      highlightPrefOnMap(pref);
+      const svg = japanSvgByWrapId["mapWrap"] || null;
+
+      // 個別ページのmapMeta表示
+      setText("mapMeta", pref || "—");
+
+      highlightPrefOnMap(svg, pref);
 
       // My Page link from bottle page
       const myPageBtn = document.getElementById("myPageBtn");
@@ -1265,9 +1311,10 @@
           statusEl.textContent = "Auth error / 認証エラー（Anonymous有効化を確認）";
         }
 
-        // load map svg early
+        // ✅ load map svg early (both bottle page + My Page)
         try{
-          await loadJapanMapSvg();
+          await loadJapanMapSvgInto("mapWrap");
+          await loadJapanMapSvgInto("myMapWrap");
         }catch(e){
           console.error(e);
           statusEl.textContent = "Map load error / japan_pref.svg を確認";
@@ -1313,13 +1360,31 @@
             };
           }
 
+          // ✅ 履歴を読み込んで、My Page 地図を塗る
+          let reviewed = [];
           try{
             me = me || await ensureAnonAuth();
-            const reviewed = await loadMyReviewed();
+            reviewed = await loadMyReviewed();
             renderMyReviewedSection(reviewed);
           }catch(e){
             console.warn("reviewed load skipped", e);
+            reviewed = [];
             renderMyReviewedSection([]);
+          }
+
+          // paint my map
+          try{
+            const mySvg = japanSvgByWrapId["myMapWrap"] || null;
+            const prefs = (reviewed || [])
+              .map(x => prefectureFromRegionJP(x.region_jp || ""))
+              .filter(Boolean);
+
+            highlightPrefsOnMap(mySvg, prefs);
+
+            const uniqueCount = new Set(prefs).size;
+            setText("myMapMeta", uniqueCount ? `Marked ${uniqueCount} prefectures` : "—");
+          }catch(e){
+            console.warn("My map paint skipped", e);
           }
 
           document.getElementById("countTag").textContent = `${items.length} bottles`;
