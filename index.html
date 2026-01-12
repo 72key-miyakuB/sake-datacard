@@ -46,9 +46,10 @@
       border-radius: 999px; background: rgba(255,255,255,.03);
       font-size: 12px; color: var(--muted);
       white-space:nowrap;
+      max-width: 70vw;
+      overflow:hidden;
+      text-overflow: ellipsis;
     }
-
-    /* ✅ 案A：1枚カードに集約（gridは1列固定） */
     .grid{ display:grid; grid-template-columns: 1fr; gap: 14px; }
 
     .card{
@@ -67,7 +68,6 @@
     .title{ display:flex; flex-direction:column; gap:4px; min-width: 0; }
     .title .jp{
       font-size: 18px; font-weight: 820;
-      /* ✅ iOSで漢字2文字が縦に割れるのを抑止 */
       word-break: keep-all;
       overflow-wrap: normal;
       line-break: strict;
@@ -88,7 +88,6 @@
     }
     .body{ padding: 14px; }
 
-    /* ✅ スマホではヘッダーを縦積み（タグが押して縦割れするのを防ぐ） */
     @media (max-width: 560px){
       .card .hd{ flex-direction:column; align-items:stretch; }
       .tags{ justify-content:flex-start; }
@@ -136,7 +135,6 @@
       font-size: 12px;
     }
 
-    /* Map block */
     .mapbox{
       border: 1px solid var(--line);
       border-radius: 14px;
@@ -148,10 +146,11 @@
     .mapbox .caption{
       display:flex; justify-content:space-between; align-items:center;
       font-size:12px; color: var(--muted); margin-bottom: 8px;
+      gap:10px;
+      flex-wrap:wrap;
     }
     .mapwrap{ width:100%; display:flex; justify-content:center; }
 
-    /* Japan SVG */
     .mapwrap svg{
       width:100%;
       max-width: 420px;
@@ -182,7 +181,6 @@
     .story .h{ font-size: 11px; color: var(--muted); margin-bottom: 6px; display:flex; justify-content:space-between; gap:10px; }
     .story .p{ font-size: 13px; }
 
-    /* Bars */
     .bar{
       display:flex; align-items:center; gap:10px;
       padding: 10px 12px;
@@ -206,7 +204,6 @@
     }
     .bar .val{ width: 28px; text-align:right; font-size: 12px; color: var(--muted); }
 
-    /* Taste compass */
     .chart{
       padding: 12px;
       border: 1px solid var(--line);
@@ -217,10 +214,11 @@
     .chart .caption{
       display:flex; justify-content:space-between; align-items:center;
       font-size:12px; color: var(--muted); margin-bottom: 8px;
+      gap:10px;
+      flex-wrap:wrap;
     }
     .svgwrap{ width:100%; display:flex; justify-content:center; }
 
-    /* Reviews header */
     .reviewHead{
       border: 1px solid rgba(215,181,109,.35);
       background: rgba(215,181,109,.08);
@@ -233,7 +231,7 @@
       font-weight: 900;
       letter-spacing: .2px;
       display:flex;
-      align-items:center;
+      align-items:flex-start;
       justify-content:space-between;
       gap:10px;
       margin:0 0 6px;
@@ -323,13 +321,8 @@
       background: rgba(255,255,255,.02);
     }
 
-    .hr{
-      height:1px;
-      background: rgba(255,255,255,.10);
-      margin: 12px 0;
-    }
+    .hr{ height:1px; background: rgba(255,255,255,.10); margin: 12px 0; }
 
-    /* List (My Page) */
     .list{
       display:grid;
       grid-template-columns: repeat(2, minmax(0,1fr));
@@ -348,79 +341,62 @@
     .item .s{ color: var(--muted); font-size: 12px; }
     .item .go{ margin-top:auto; display:flex; gap:10px; flex-wrap:wrap; }
 
-    /* Rating summary / distribution */
     .ratingTop{
-    display:flex; gap:12px; align-items:flex-start; justify-content:space-between;
-    flex-wrap:wrap;
+      display:flex; gap:12px; align-items:flex-start; justify-content:space-between;
+      flex-wrap:wrap;
     }
     .ratingBig{
-    display:flex; flex-direction:column; gap:2px;
-    padding: 10px 12px;
-    border: 1px solid var(--line);
-    border-radius: 14px;
-    background: rgba(0,0,0,.12);
-    min-width: 180px;
+      display:flex; flex-direction:column; gap:2px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(0,0,0,.12);
+      min-width: 180px;
     }
-    .ratingAvg{
-    font-size: 28px;
-    font-weight: 920;
-    letter-spacing: .2px;
-    line-height: 1.1;
-    }
-    .ratingMeta{
-    font-size: 12px;
-    color: var(--muted);
-    }
+    .ratingAvg{ font-size: 28px; font-weight: 920; letter-spacing: .2px; line-height: 1.1; }
+    .ratingMeta{ font-size: 12px; color: var(--muted); }
     .ratingSide{
-    flex:1;
-    min-width: 180px;
-    display:flex; flex-direction:column; gap:6px;
-    padding: 10px 12px;
-    border: 1px solid var(--line);
-    border-radius: 14px;
-    background: rgba(0,0,0,.10);
+      flex:1;
+      min-width: 180px;
+      display:flex; flex-direction:column; gap:6px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(0,0,0,.10);
     }
     .ratingLine{
-    display:flex; justify-content:space-between; gap:10px;
-    font-size: 12px;
-    color: rgba(255,255,255,.86);
+      display:flex; justify-content:space-between; gap:10px;
+      font-size: 12px;
+      color: rgba(255,255,255,.86);
     }
 
     .dist{
-    margin-top: 10px;
-    display:flex;
-    flex-direction:column;
-    gap:8px;
+      margin-top: 10px;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
     }
     .distRow{
-    display:grid;
-    grid-template-columns: 18px 1fr 60px;
-    gap:10px;
-    align-items:center;
+      display:grid;
+      grid-template-columns: 18px 1fr 60px;
+      gap:10px;
+      align-items:center;
     }
-    .distLbl{
-    font-size: 12px;
-    color: var(--muted);
-    text-align:right;
-    }
+    .distLbl{ font-size: 12px; color: var(--muted); text-align:right; }
     .distBar{
-    height: 10px;
-    border-radius: 999px;
-    background: rgba(255,255,255,.08);
-    border: 1px solid rgba(255,255,255,.08);
-    overflow:hidden;
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.08);
+      overflow:hidden;
     }
     .distBar i{
-    display:block;
-    height:100%;
-    width:0%;
-    background: linear-gradient(90deg, rgba(215,181,109,.95), rgba(126,227,166,.85));
+      display:block;
+      height:100%;
+      width:0%;
+      background: linear-gradient(90deg, rgba(215,181,109,.95), rgba(126,227,166,.85));
     }
-    .distVal{
-    font-size: 12px;
-    color: var(--muted);
-    text-align:right;
-    }
+    .distVal{ font-size: 12px; color: var(--muted); text-align:right; }
   </style>
 </head>
 
@@ -435,8 +411,6 @@
     </header>
 
     <main class="grid">
-
-      <!-- ✅ Bottle page: ONE CARD (A) -->
       <section class="card" id="sheetCard" style="display:none;">
         <div class="hd">
           <div class="title">
@@ -447,7 +421,6 @@
         </div>
 
         <div class="body">
-          <!-- ① Specまで：現状維持 -->
           <div class="row">
             <div class="kpi">
               <div class="k"><span>蔵 / Brewery</span><span class="muted">JP/EN</span></div>
@@ -466,7 +439,6 @@
             </div>
           </div>
 
-          <!-- ② Map (🗾 Origin / 産地) -->
           <div class="mapbox">
             <div class="caption">
               <span>🗾 Origin / 産地</span>
@@ -476,7 +448,6 @@
             <div class="hint muted">※ 県をハイライト表示（壊れにくいSVG）</div>
           </div>
 
-          <!-- ③ Story -->
           <div class="story">
             <div class="h">
               <span>📖 Story / ストーリー</span>
@@ -485,20 +456,17 @@
             <div class="p" id="storyText">—</div>
           </div>
 
-          <!-- ④ テイスティング見出し -->
           <div class="sectionTitle">
             <span>テイスティング / Tasting</span>
             <span class="sub"><span class="tag" id="idTag">id: —</span></span>
           </div>
 
-          <!-- ⑤ Aroma / Palate / Pairing（Temp/Glass/One-linerは外す） -->
           <table class="table" aria-label="Sake quick table">
             <tr><th>香り / Aroma</th><td id="aroma">—</td></tr>
             <tr><th>味わい / Palate</th><td id="palate">—</td></tr>
             <tr><th>相性 / Pairing</th><td id="pairing">—</td></tr>
           </table>
 
-          <!-- ⑥ Parameters -->
           <div class="sectionTitle" style="margin-top:16px;">
             <span>パラメーター / Parameters</span>
             <span class="sub">0–5</span>
@@ -525,7 +493,6 @@
             <div class="val" id="val_acid">—</div>
           </div>
 
-          <!-- ⑦ Taste Compass -->
           <div class="chart">
             <div class="caption">
               <span>🧭 Taste Compass / 味の羅針盤</span>
@@ -535,11 +502,11 @@
             <div class="hint muted">※ CSV: (sweet, aroma_intensity, body, acidity)</div>
           </div>
 
-          <!-- ⑧ Reviews（説明文に英訳） -->
           <div class="reviewHead">
             <div class="h1">
               <span>✍️ Reviews / 感想を書く・読む</span>
               <span class="badge" id="ratingBadge">—</span>
+
               <div class="ratingSummary" id="ratingSummary" style="margin-top:10px;">
                 <div class="ratingTop">
                   <div class="ratingBig">
@@ -552,20 +519,19 @@
                     <div class="ratingLine"><span class="muted">最多</span><span id="modeStar">—</span></div>
                   </div>
                 </div>
-              
+
                 <div class="dist" aria-label="Rating distribution">
-                  <!-- ★5 → ★1 の順 -->
                   <div class="distRow"><span class="distLbl">5</span><div class="distBar"><i id="bar5"></i></div><span class="distVal" id="val5">—</span></div>
                   <div class="distRow"><span class="distLbl">4</span><div class="distBar"><i id="bar4"></i></div><span class="distVal" id="val4">—</span></div>
                   <div class="distRow"><span class="distLbl">3</span><div class="distBar"><i id="bar3"></i></div><span class="distVal" id="val3">—</span></div>
                   <div class="distRow"><span class="distLbl">2</span><div class="distBar"><i id="bar2"></i></div><span class="distVal" id="val2">—</span></div>
                   <div class="distRow"><span class="distLbl">1</span><div class="distBar"><i id="bar1"></i></div><span class="distVal" id="val1">—</span></div>
                 </div>
-              
+
                 <div class="hint muted" style="margin-top:8px;">※ 分布はこの銘柄の全レビュー（共有）から集計</div>
               </div>
-              
             </div>
+
             <p class="desc">
               初回は「お名前」を入れて投稿すると、その名前がこの端末に保存されます（面倒な会員登録なし）。<br/>
               次に別のQRを読んでも同じ名前で続けて投稿できます。投稿したレビューは店内の全員に表示されます。<br/>
@@ -578,7 +544,6 @@
 
           <div class="reviews" id="reviews"></div>
 
-          <!-- ⑨ 星の統計（badge）＋投稿フォーム -->
           <div class="form" aria-label="Review form">
             <div class="formgrid">
               <div>
@@ -608,11 +573,13 @@
               ※ 投稿後、この銘柄は「My Page（履歴）」に自動で追加されます。<br/>
               After posting, this bottle will be added to “My Page (History)” automatically.
             </div>
+            <div class="hint muted" id="postedLocalHint" style="display:none;">
+              ※ この端末ではこの銘柄は投稿済みです（編集はスタッフにお声がけください）。
+            </div>
           </div>
 
           <div class="hr"></div>
 
-          <!-- ⑩ My page ボタン（最後） -->
           <div class="actions">
             <a class="btn secondary" id="myPageBtn" href="./index.html">⭐ My Page / 履歴を見る</a>
           </div>
@@ -625,7 +592,6 @@
         </div>
       </section>
 
-      <!-- My Page (when no ?id) -->
       <section class="card" id="listCard" style="display:none;">
         <div class="hd">
           <div class="title">
@@ -653,11 +619,11 @@
             </p>
             <div class="actions" style="margin-top:10px;">
               <button class="secondary" id="changeNameBtn" type="button">名前を変更 / Change name</button>
+              <button class="secondary" id="resetDeviceBtn" type="button">🧹 端末データ初期化 / Reset</button>
             </div>
             <div class="hint muted">※ 名前を変えると次回以降の投稿名が変わります（過去レビューの表示名は変わりません）。</div>
           </div>
 
-          <!-- ✅ My Page Map (塗りつぶし) -->
           <div class="mapbox" style="margin: 12px 0;">
             <div class="caption">
               <span>🗾 Origin Map / 産地マップ（あなたの履歴）</span>
@@ -681,7 +647,6 @@
           <div class="hint muted">※ 個別ページは <span class="muted">?id=xxxx</span> で開きます。</div>
         </div>
       </section>
-
     </main>
   </div>
 
@@ -708,6 +673,10 @@
     const REVIEWS_COLLECTION = "reviews";
     const USERS_COLLECTION   = "users";
     const REVIEW_LIMIT = 60;
+
+    // Local keys
+    const LS_NAME_KEY = "tsc_displayName";
+    const LS_POSTED_PREFIX = "tsc_posted_"; // tsc_posted_<sakeId> = "1"
 
     const statusEl = document.getElementById("status");
 
@@ -764,16 +733,35 @@
       if (el) el.textContent = value ?? "—";
     }
 
-    // ---------- Auth (Anonymous) + displayName ----------
-    const LS_NAME_KEY = "tsc_displayName";
+    // ---------- Local posted guard ----------
+    function hasPostedLocal(sakeId){
+      const key = LS_POSTED_PREFIX + String(sakeId || "");
+      return localStorage.getItem(key) === "1";
+    }
+    function markPostedLocal(sakeId){
+      const key = LS_POSTED_PREFIX + String(sakeId || "");
+      localStorage.setItem(key, "1");
+    }
+    function showPostedLocalHint(show){
+      const el = document.getElementById("postedLocalHint");
+      if (!el) return;
+      el.style.display = show ? "" : "none";
+    }
 
-    async function ensureAnonAuth(){
+    // ---------- Auth (Anonymous) : ONE PATH ONLY ----------
+    async function initAuth(){
       if(!auth) throw new Error("Auth not ready");
+
+      // ✅ Always LOCAL persistence (keeps uid stable across reload)
+      await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+
+      // Already signed in
       if (auth.currentUser) return auth.currentUser;
 
-      const cred = await auth.signInAnonymously();
+      // Sign in anonymously
+      await auth.signInAnonymously();
 
-      // auth state が反映されるまで待つ（重要）
+      // Wait for state
       await new Promise(resolve => {
         const unsub = auth.onAuthStateChanged(u => {
           if (u) { unsub(); resolve(); }
@@ -783,27 +771,38 @@
       return auth.currentUser;
     }
 
-    function setMeTag(){
-      const el = document.getElementById("meTag");
-      if (!el) return;
-      if (!me) { el.textContent = "me: —"; return; }
-      el.textContent = `me: ${me.isAnonymous ? "guest" : "user"} · ${String(me.uid).slice(0,6)}`;
+    function debugAuth(where=""){
+      const u = auth?.currentUser || null;
+      const uid = u?.uid ? String(u.uid).slice(0,6) : "—";
+      const anon = u?.isAnonymous ? "guest" : "user";
+      const origin = location.origin;
+      console.log(`[AUTH${where?`:${where}`:""}] uid=`, u?.uid, "anon=", u?.isAnonymous, "origin=", origin);
+      if (statusEl) statusEl.textContent = u ? `Ready ✅ ${anon}:${uid} · ${origin}` : `No auth · ${origin}`;
+      const meTag = document.getElementById("meTag");
+      if (meTag) meTag.textContent = u ? `me: ${anon} · ${uid}` : "me: —";
     }
 
+    async function ensureMe(){
+      me = me || await initAuth();
+      return me;
+    }
+
+    // ---------- Profile ----------
     async function loadMyProfile(){
-      if (!db || !me) return { displayName: localStorage.getItem(LS_NAME_KEY) || "" };
+      const local = localStorage.getItem(LS_NAME_KEY) || "";
+      if (!db) return { displayName: local };
 
       try{
-        const ref = db.collection(USERS_COLLECTION).doc(me.uid);
+        const u = await ensureMe();
+        const ref = db.collection(USERS_COLLECTION).doc(u.uid);
         const snap = await ref.get();
         const dn = snap.exists ? (snap.data()?.displayName || "") : "";
-        const local = localStorage.getItem(LS_NAME_KEY) || "";
         const displayName = dn || local || "";
         if (displayName) localStorage.setItem(LS_NAME_KEY, displayName);
         return { displayName };
       }catch(e){
         console.error(e);
-        return { displayName: localStorage.getItem(LS_NAME_KEY) || "" };
+        return { displayName: local };
       }
     }
 
@@ -813,8 +812,9 @@
 
       localStorage.setItem(LS_NAME_KEY, displayName);
 
-      if (db && me){
-        await db.collection(USERS_COLLECTION).doc(me.uid).set({
+      if (db){
+        const u = await ensureMe();
+        await db.collection(USERS_COLLECTION).doc(u.uid).set({
           displayName,
           updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         }, { merge:true });
@@ -901,7 +901,6 @@
     }
 
     // ---------- Japan SVG Map ----------
-    // region_jp から "○○県/○○府/東京都/北海道" を抽出
     function prefectureFromRegionJP(regionJP){
       const s = String(regionJP||"").trim();
       const m = s.match(/(北海道|東京都|..府|..県)/);
@@ -920,8 +919,7 @@
       "鹿児島県":"kagoshima","沖縄県":"okinawa",
     };
 
-    // ✅ 複数の地図（mapWrap / myMapWrap）を持てるようにする
-    let japanSvgByWrapId = {}; // { mapWrap: svgEl, myMapWrap: svgEl }
+    let japanSvgByWrapId = {};
 
     function getPrefGroups(svg){
       return Array.from(svg.querySelectorAll("g.prefecture"));
@@ -940,7 +938,6 @@
       });
     }
 
-    // ✅ 任意のwrapIdへSVGを流し込む（mapWrap / myMapWrap 両対応）
     async function loadJapanMapSvgInto(wrapId){
       const wrap = document.getElementById(wrapId);
       if(!wrap) return null;
@@ -981,7 +978,6 @@
       return null;
     }
 
-    // ✅ 1県だけハイライト（個別ページ用）
     function highlightPrefOnMap(svg, prefJp){
       if(!svg) return;
 
@@ -1006,7 +1002,6 @@
       });
     }
 
-    // ✅ 複数県をまとめて塗る（My Page用）
     function highlightPrefsOnMap(svg, prefList){
       if(!svg) return;
 
@@ -1035,10 +1030,11 @@
 
     // ---------- My reviewed list ----------
     async function loadMyReviewed(){
-      if (!db || !me) return [];
+      if (!db) return [];
+      const u = await ensureMe();
       const snap = await db
         .collection(USERS_COLLECTION)
-        .doc(me.uid)
+        .doc(u.uid)
         .collection("reviewed")
         .orderBy("reviewedAt", "desc")
         .limit(200)
@@ -1098,74 +1094,56 @@
     }
 
     function fmtPct(x){
-  if (!Number.isFinite(x)) return "—";
-  return `${Math.round(x*100)}%`;
-}
+      if (!Number.isFinite(x)) return "—";
+      return `${Math.round(x*100)}%`;
+    }
 
-function setDistributionUI(list){
-  const count = list.length;
-  const avg = count ? (list.reduce((a,b)=>a+(b.rating||0),0) / count) : 0;
+    function setDistributionUI(list){
+      const count = list.length;
+      const avg = count ? (list.reduce((a,b)=>a+(b.rating||0),0) / count) : 0;
 
-  // counts: index=star (1..5)
-  const c = {1:0,2:0,3:0,4:0,5:0};
-  for(const r of list){
-    const k = Math.max(1, Math.min(5, Number(r.rating)||0));
-    c[k] = (c[k]||0) + 1;
-  }
+      const c = {1:0,2:0,3:0,4:0,5:0};
+      for(const r of list){
+        const k = Math.max(1, Math.min(5, Number(r.rating)||0));
+        c[k] = (c[k]||0) + 1;
+      }
 
-  // mode (most frequent)
-  let mode = 0, modeCnt = -1;
-  for (let k=5;k>=1;k--){
-    const v = c[k]||0;
-    if (v > modeCnt){ modeCnt = v; mode = k; }
-  }
+      let mode = 0, modeCnt = -1;
+      for (let k=5;k>=1;k--){
+        const v = c[k]||0;
+        if (v > modeCnt){ modeCnt = v; mode = k; }
+      }
 
-  // key ratios
-  const pct45 = count ? ( (c[4]+c[5]) / count ) : 0;
-  const pct12 = count ? ( (c[1]+c[2]) / count ) : 0;
+      const pct45 = count ? ( (c[4]+c[5]) / count ) : 0;
+      const pct12 = count ? ( (c[1]+c[2]) / count ) : 0;
 
-  // big blocks
-  const avgBig = document.getElementById("avgBig");
-  const countBig = document.getElementById("countBig");
-  const pct45El = document.getElementById("pct45");
-  const pct12El = document.getElementById("pct12");
-  const modeEl  = document.getElementById("modeStar");
+      const avgBig = document.getElementById("avgBig");
+      const countBig = document.getElementById("countBig");
+      const pct45El = document.getElementById("pct45");
+      const pct12El = document.getElementById("pct12");
+      const modeEl  = document.getElementById("modeStar");
 
-  if (avgBig) avgBig.textContent = count ? `★ ${avg.toFixed(1)}` : "—";
-  if (countBig) countBig.textContent = count ? `${count} reviews` : "—";
-  if (pct45El) pct45El.textContent = count ? fmtPct(pct45) : "—";
-  if (pct12El) pct12El.textContent = count ? fmtPct(pct12) : "—";
-  if (modeEl)  modeEl.textContent  = count ? `★${mode}` : "—";
+      if (avgBig) avgBig.textContent = count ? `★ ${avg.toFixed(1)}` : "—";
+      if (countBig) countBig.textContent = count ? `${count} reviews` : "—";
+      if (pct45El) pct45El.textContent = count ? fmtPct(pct45) : "—";
+      if (pct12El) pct12El.textContent = count ? fmtPct(pct12) : "—";
+      if (modeEl)  modeEl.textContent  = count ? `★${mode}` : "—";
 
-  // badge (existing)
-  const badge = document.getElementById("ratingBadge");
-  if (badge) badge.textContent = count ? `★ ${avg.toFixed(1)} / 5  (${count})` : "—";
+      const badge = document.getElementById("ratingBadge");
+      if (badge) badge.textContent = count ? `★ ${avg.toFixed(1)} / 5  (${count})` : "—";
 
-  // distribution bars (normalize by max bucket)
-  const maxBucket = Math.max(c[1],c[2],c[3],c[4],c[5], 1);
+      const maxBucket = Math.max(c[1],c[2],c[3],c[4],c[5], 1);
 
-  function setBarRow(star){
-    const bar = document.getElementById(`bar${star}`);
-    const val = document.getElementById(`val${star}`);
-    const n = c[star] || 0;
-    const pct = (n / maxBucket) * 100; // relative bar length
-    if (bar) bar.style.width = `${pct}%`;
-    if (val) val.textContent = count ? `${n} (${Math.round((n/count)*100)}%)` : "—";
-  }
-
-  [5,4,3,2,1].forEach(setBarRow);
-}
-
-function setRatingBadge(avg, count){
-  // 旧互換：renderReviewsSharedから呼ばれてもOKにする
-  // ここではUI全体は list から描画するので no-op でも良いが、
-  // 念のため badge を更新
-  const b = document.getElementById("ratingBadge");
-  if (!b) return;
-  if (!count){ b.textContent = "—"; return; }
-  b.textContent = `★ ${avg.toFixed(1)} / 5  (${count})`;
-}
-
+      function setBarRow(star){
+        const bar = document.getElementById(`bar${star}`);
+        const val = document.getElementById(`val${star}`);
+        const n = c[star] || 0;
+        const pct = (n / maxBucket) * 100;
+        if (bar) bar.style.width = `${pct}%`;
+        if (val) val.textContent = count ? `${n} (${Math.round((n/count)*100)}%)` : "—";
+      }
+      [5,4,3,2,1].forEach(setBarRow);
+    }
 
     function renderReviewsShared(list){
       const box = document.getElementById("reviews");
@@ -1174,13 +1152,10 @@ function setRatingBadge(avg, count){
 
       if (!list || list.length === 0){
         box.innerHTML = `<div class="hint muted">No reviews yet. / まだレビューはありません。</div>`;
-        setRatingBadge(0, 0);
+        setDistributionUI([]);
         return;
       }
 
-      const sum = list.reduce((a,b)=>a+(b.rating||0),0);
-      const avg = sum / list.length;
-      setRatingBadge(avg, list.length);
       setDistributionUI(list);
 
       list.forEach(r => {
@@ -1230,8 +1205,8 @@ function setRatingBadge(avg, count){
     }
 
     async function postReviewShared(sakeId, {name, rating, msg}){
-      me = me || await ensureAnonAuth();
       if (!db) throw new Error("Firestore not ready");
+      const u = await ensureMe();
 
       const clean = {
         sakeId: String(sakeId || "").slice(0, 60),
@@ -1239,19 +1214,23 @@ function setRatingBadge(avg, count){
         rating: Math.max(1, Math.min(5, Number(rating)||5)),
         msg: String(msg || "").trim().slice(0, 240),
         ts: firebase.firestore.FieldValue.serverTimestamp(),
-        uid: String(me?.uid || "anon").slice(0, 80),
+        uid: String(u?.uid || "anon").slice(0, 80),
       };
       if (!clean.msg) throw new Error("Empty message");
 
-      const docId = myReviewDocId(clean.sakeId, me.uid);
+      const docId = myReviewDocId(clean.sakeId, u.uid);
 
-      // docId固定で「1回だけ投稿」になる
-      await db.collection(REVIEWS_COLLECTION).doc(docId).set(clean);
+      // docId固定で「同一uidは上書き」＝実質1回（uidが安定していることが前提）
+      await db.collection(REVIEWS_COLLECTION).doc(docId).set(clean, { merge:true });
+
+      // ローカルでもガード
+      markPostedLocal(clean.sakeId);
     }
 
     async function markReviewed(sakeId, bottleMeta){
-      if (!db || !me) return;
-      const ref = db.collection(USERS_COLLECTION).doc(me.uid)
+      if (!db) return;
+      const u = await ensureMe();
+      const ref = db.collection(USERS_COLLECTION).doc(u.uid)
         .collection("reviewed").doc(String(sakeId));
       await ref.set({
         sakeId: String(sakeId),
@@ -1317,8 +1296,10 @@ function setRatingBadge(avg, count){
       window.__currentBottleMeta = it;
 
       currentSakeId = it.id;
-
       document.getElementById("sheetCard").style.display = "";
+
+      // local posted hint
+      showPostedLocalHint(hasPostedLocal(currentSakeId));
 
       setText("name_jp", it.name_jp || it.id || "—");
       setText("name_en", it.name_en || "");
@@ -1371,36 +1352,28 @@ function setRatingBadge(avg, count){
       if (tasteWrap) tasteWrap.innerHTML = tasteSvg({sweet, aroma, body, acid});
 
       const pref = prefectureFromRegionJP(it.region_jp || "");
-      const svg = japanSvgByWrapId["mapWrap"] || null;
-
-      // 個別ページのmapMeta表示
       setText("mapMeta", pref || "—");
-
+      const svg = japanSvgByWrapId["mapWrap"] || null;
       highlightPrefOnMap(svg, pref);
 
-      // My Page link from bottle page
-      const myPageBtn = document.getElementById("myPageBtn");
-      if (myPageBtn){
-        myPageBtn.onclick = async (e) => {
-          e.preventDefault();
-          try{
-            me = me || await ensureAnonAuth();
-            setMeTag();
-          }catch(_){}
-          location.href = "./index.html";
-        };
-      }
-
-      // Start reviews listener
+      // start listener
       listenReviewsShared(it.id);
 
-      // Post button
+      // submit
       const submitBtn = document.getElementById("submitReviewBtn");
       if (submitBtn){
+        submitBtn.disabled = hasPostedLocal(currentSakeId); // ローカルガード（体験）
         submitBtn.onclick = async () => {
           try{
-            me = me || await ensureAnonAuth();
-            setMeTag();
+            // local guard (hard stop)
+            if (hasPostedLocal(currentSakeId)){
+              showPostedLocalHint(true);
+              statusEl.textContent = "Already posted on this device / この端末では投稿済みです";
+              return;
+            }
+
+            await ensureMe();
+            debugAuth("post");
 
             let name = (document.getElementById("rv_name").value || "").trim();
             const rating = Number(document.getElementById("rv_rating").value || 5);
@@ -1424,16 +1397,16 @@ function setRatingBadge(avg, count){
 
             document.getElementById("rv_msg").value = "";
             statusEl.textContent = "Posted ✅ / 投稿しました";
+
+            // lock after post
+            showPostedLocalHint(true);
+            submitBtn.disabled = true;
+
           }catch(err){
             console.error(err);
             const code = err?.code || "";
             const m  = err?.message ? err.message : String(err);
-
-            if (code === "permission-denied" || /permission/i.test(m)) {
-              statusEl.textContent = "You already posted a review for this bottle. / この銘柄のレビューは1回までです（修正はスタッフにお声がけください）";
-            } else {
-              statusEl.textContent = `Post failed${code ? ` (${code})` : ""}: ${m}`;
-            }
+            statusEl.textContent = `Post failed${code ? ` (${code})` : ""}: ${m}`;
           }
         };
       }
@@ -1449,18 +1422,12 @@ function setRatingBadge(avg, count){
 
     async function main(){
       try{
-        if (auth){
-          auth.onAuthStateChanged(u => {
-            me = u || null;
-            setMeTag();
-          });
-        }
-
-        // auto anonymous login (always)
+        // auth boot
         try{
-          me = await ensureAnonAuth();
-          setMeTag();
+          await ensureMe();
+          debugAuth("boot");
 
+          // prefill name
           const prof = await loadMyProfile();
           if (prof.displayName){
             const nameEl = document.getElementById("rv_name");
@@ -1469,12 +1436,15 @@ function setRatingBadge(avg, count){
           }else{
             setMyNameBadge("");
           }
+
+          // keep updated
+          auth.onAuthStateChanged(() => debugAuth("state"));
         }catch(e){
           console.error(e);
           statusEl.textContent = "Auth error / 認証エラー（Anonymous有効化を確認）";
         }
 
-        // ✅ load map svg early (both bottle page + My Page)
+        // maps
         try{
           await loadJapanMapSvgInto("mapWrap");
           await loadJapanMapSvgInto("myMapWrap");
@@ -1483,23 +1453,28 @@ function setRatingBadge(avg, count){
           statusEl.textContent = "Map load error / japan_pref.svg を確認";
         }
 
-        // load CSV
+        // csv
         const res = await fetch(CSV_PATH, { cache: "no-store" });
         if(!res.ok) throw new Error("CSV fetch failed: " + res.status);
         const text = await res.text();
         const items = parseCSV(text);
 
-        statusEl.textContent = `CSV loaded ✅ (${items.length})`;
+        statusEl.textContent = `CSV loaded ✅ (${items.length}) · ${statusEl.textContent}`;
 
-        // My Page (no ?id)
+        // My Page
         if(!targetId){
           document.getElementById("listCard").style.display = "";
 
+          // tags
+          document.getElementById("countTag").textContent = `${items.length} bottles`;
+
+          // name badge
           try{
             const prof = await loadMyProfile();
             setMyNameBadge(prof.displayName || "");
           }catch(_){}
 
+          // change name
           const changeBtn = document.getElementById("changeNameBtn");
           if (changeBtn){
             changeBtn.onclick = async () => {
@@ -1512,7 +1487,6 @@ function setRatingBadge(avg, count){
                 return;
               }
               try{
-                me = me || await ensureAnonAuth();
                 await saveMyDisplayName(nm);
                 setMyNameBadge(nm);
                 statusEl.textContent = "Name updated ✅ / 名前を更新しました";
@@ -1523,19 +1497,39 @@ function setRatingBadge(avg, count){
             };
           }
 
-          // ✅ 履歴を読み込んで、My Page 地図を塗る
+          // reset device data
+          const resetBtn = document.getElementById("resetDeviceBtn");
+          if (resetBtn){
+            resetBtn.onclick = async () => {
+              const ok = confirm("この端末の保存データ（名前/投稿済みフラグ）を初期化します。よろしいですか？");
+              if (!ok) return;
+              try{
+                // clear local keys
+                localStorage.removeItem(LS_NAME_KEY);
+                // posted flags
+                for (let i=localStorage.length-1; i>=0; i--){
+                  const k = localStorage.key(i);
+                  if (k && k.startsWith(LS_POSTED_PREFIX)) localStorage.removeItem(k);
+                }
+                statusEl.textContent = "Reset ✅ / 初期化しました（リロードしてください）";
+                alert("初期化しました。ページを再読み込みしてください。");
+              }catch(e){
+                console.error(e);
+                statusEl.textContent = "Reset failed / 初期化失敗";
+              }
+            };
+          }
+
+          // reviewed load + map paint
           let reviewed = [];
           try{
-            me = me || await ensureAnonAuth();
             reviewed = await loadMyReviewed();
             renderMyReviewedSection(reviewed);
           }catch(e){
-            console.warn("reviewed load skipped", e);
-            reviewed = [];
+            console.warn("reviewed load failed", e);
             renderMyReviewedSection([]);
           }
 
-          // paint my map
           try{
             const mySvg = japanSvgByWrapId["myMapWrap"] || null;
             const prefs = (reviewed || [])
@@ -1550,12 +1544,11 @@ function setRatingBadge(avg, count){
             console.warn("My map paint skipped", e);
           }
 
-          document.getElementById("countTag").textContent = `${items.length} bottles`;
           renderAllBottles(items);
           return;
         }
 
-        // Bottle page (?id)
+        // Bottle page
         const it = items.find(x => String(x.id) === String(targetId));
         if(!it){
           statusEl.textContent = "Not found / 銘柄IDが見つかりません";
