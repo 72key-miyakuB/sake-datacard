@@ -452,6 +452,30 @@
       position:relative;
       z-index:1;
     }
+
+    /* ★ bottle background layer for sheetCard */
+    #sheetCard{ position:relative; }
+    #sheetBg.sheetBg{
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      z-index:0;
+
+      background-repeat:no-repeat;
+      background-size: 360px auto;      /* ← ここでサイズ調整 */
+      background-position: 90% 80%;     /* ← いま良いと言ってた値 */
+      opacity: .10;                     /* うっすら */
+      filter: saturate(1.05) contrast(1.05);
+    }
+
+    /* ★ content should be above the bg */
+    #sheetCard .hd,
+    #sheetCard .body,
+    #sheetCard .footnote{
+      position:relative;
+      z-index:1;
+    }
+
   </style>
 </head>
 
@@ -467,6 +491,7 @@
 
     <main class="grid">
       <section class="card" id="sheetCard" style="display:none;">
+        <div id="sheetBg" class="sheetBg" aria-hidden="true"></div>
         <div id="reviewBg" class="reviewBg"></div>
         <div class="hd">
           <div class="title">
@@ -1582,6 +1607,12 @@
 
       currentSakeId = it.id;
       document.getElementById("sheetCard").style.display = "";
+
+      // ★ bottle bg on sheetCard
+      const sheetBg = document.getElementById("sheetBg");
+      if (sheetBg && currentSakeId) {
+        sheetBg.style.backgroundImage = `url(./image/${currentSakeId}.png)`;
+      }
 
       setText("name_jp", it.name_jp || it.id || "—");
       setText("name_en", it.name_en || "");
