@@ -619,7 +619,7 @@
             </p>
             <div class="actions" style="margin-top:10px;">
               <button class="secondary" id="changeNameBtn" type="button">名前を変更 / Change name</button>
-              <button class="secondary" id="resetDeviceBtn" type="button">🧹 端末データ初期化 / Reset</button>
+              <button class="secondary" id="resetBtn" type="button">端末データ初期化 / Reset</button>
             </div>
             <div class="hint muted">※ 名前を変えると次回以降の投稿名が変わります（過去レビューの表示名は変わりません）。</div>
           </div>
@@ -657,7 +657,7 @@
 
   <script>
     // =========================
-    // Firebase設定（要差し替え）
+    // Firebase設定
     // =========================
     const firebaseConfig = {
       apiKey: "AIzaSyD1sbz6sLUMf6tabsjwvteEOoQB6vFlcZU",
@@ -742,6 +742,12 @@
       const key = LS_POSTED_PREFIX + String(sakeId || "");
       localStorage.setItem(key, "1");
     }
+    function clearPostedLocalAll(){
+      for (let i=localStorage.length-1; i>=0; i--){
+        const k = localStorage.key(i);
+        if (k && k.startsWith(LS_POSTED_PREFIX)) localStorage.removeItem(k);
+      }
+    }
     function showPostedLocalHint(show){
       const el = document.getElementById("postedLocalHint");
       if (!el) return;
@@ -825,7 +831,7 @@
     function setMyNameBadge(name){
       const b = document.getElementById("myNameBadge");
       if (!b) return;
-      b.textContent = `name: ${name ? escapeHtml(name) : "—"}`;
+      b.textContent = `name: ${name ? String(name) : "—"}`;
     }
 
     // ---------- CSV parsing ----------
@@ -1029,6 +1035,50 @@
     }
 
     // ---------- My reviewed list ----------
+    async function deleteCollectionInBatches(colRef, batchSize = 450){
+      while(true){
+        const snap = await colRef.limit(batchSize).get();
+        if (snap.empty) break;
+        const batch = db.batch();
+        snap.forEach(doc => batch.delete(doc.ref));
+        await batch.commit();
+      }
+    }
+
+    async function resetDeviceData(){
+      const ok = confirm(
+        "この端末の履歴（My Page）を初期化します。\n" +
+        "・表示名（この端末）\n" +
+        "・投稿済みフラグ（この端末）\n" +
+        "・My Page 履歴（/users/{uid}/reviewed）\n\n" +
+        "レビュー本文（/reviews）は店内共有なので消しません。\n" +
+        "続行しますか？"
+      );
+      if(!ok) return;
+
+      try{
+        me = me || await initAuth();
+        debugAuth("reset");
+
+        // 1) localStorage をクリア
+        localStorage.removeItem(LS_NAME_KEY);
+        clearPostedLocalAll();
+
+        // 2) Firestore: /users/{uid}/reviewed を全削除
+        if (db && me){
+          const col = db.collection(USERS_COLLECTION).doc(me.uid).collection("reviewed");
+          await deleteCollectionInBatches(col, 450);
+        }
+
+        // 3) UI反映（＆キャッシュ対策：リロード）
+        statusEl.textContent = "Reset ✅ / 端末データを初期化しました。再読み込みします…";
+        location.reload();
+      }catch(e){
+        console.error(e);
+        statusEl.textContent = "Reset failed / 初期化に失敗（権限・通信・Rulesを確認）";
+      }
+    }
+
     async function loadMyReviewed(){
       if (!db) return [];
       const u = await ensureMe();
@@ -1220,8 +1270,8 @@
 
       const docId = myReviewDocId(clean.sakeId, u.uid);
 
-      // docId固定で「同一uidは上書き」＝実質1回（uidが安定していることが前提）
-      await db.collection(REVIEWS_COLLECTION).doc(docId).set(clean, { merge:true });
+      // docId固定で「同一uidは上書き」(Rules側でupdateを許可している必要あり)
+      await db.collection(REVIEWS_COLLECTION).doc(docId).set(clean, { merge: true });
 
       // ローカルでもガード
       markPostedLocal(clean.sakeId);
@@ -1362,10 +1412,9 @@
       // submit
       const submitBtn = document.getElementById("submitReviewBtn");
       if (submitBtn){
-        submitBtn.disabled = hasPostedLocal(currentSakeId); // ローカルガード（体験）
+        submitBtn.disabled = hasPostedLocal(currentSakeId);
         submitBtn.onclick = async () => {
           try{
-            // local guard (hard stop)
             if (hasPostedLocal(currentSakeId)){
               showPostedLocalHint(true);
               statusEl.textContent = "Already posted on this device / この端末では投稿済みです";
@@ -1398,7 +1447,6 @@
             document.getElementById("rv_msg").value = "";
             statusEl.textContent = "Posted ✅ / 投稿しました";
 
-            // lock after post
             showPostedLocalHint(true);
             submitBtn.disabled = true;
 
@@ -1427,7 +1475,6 @@
           await ensureMe();
           debugAuth("boot");
 
-          // prefill name
           const prof = await loadMyProfile();
           if (prof.displayName){
             const nameEl = document.getElementById("rv_name");
@@ -1437,7 +1484,6 @@
             setMyNameBadge("");
           }
 
-          // keep updated
           auth.onAuthStateChanged(() => debugAuth("state"));
         }catch(e){
           console.error(e);
@@ -1465,10 +1511,8 @@
         if(!targetId){
           document.getElementById("listCard").style.display = "";
 
-          // tags
           document.getElementById("countTag").textContent = `${items.length} bottles`;
 
-          // name badge
           try{
             const prof = await loadMyProfile();
             setMyNameBadge(prof.displayName || "");
@@ -1497,26 +1541,11 @@
             };
           }
 
-          // reset device data
-          const resetBtn = document.getElementById("resetDeviceBtn");
+          // ✅ reset device data (fixed id)
+          const resetBtn = document.getElementById("resetBtn");
           if (resetBtn){
             resetBtn.onclick = async () => {
-              const ok = confirm("この端末の保存データ（名前/投稿済みフラグ）を初期化します。よろしいですか？");
-              if (!ok) return;
-              try{
-                // clear local keys
-                localStorage.removeItem(LS_NAME_KEY);
-                // posted flags
-                for (let i=localStorage.length-1; i>=0; i--){
-                  const k = localStorage.key(i);
-                  if (k && k.startsWith(LS_POSTED_PREFIX)) localStorage.removeItem(k);
-                }
-                statusEl.textContent = "Reset ✅ / 初期化しました（リロードしてください）";
-                alert("初期化しました。ページを再読み込みしてください。");
-              }catch(e){
-                console.error(e);
-                statusEl.textContent = "Reset failed / 初期化失敗";
-              }
+              await resetDeviceData();
             };
           }
 
