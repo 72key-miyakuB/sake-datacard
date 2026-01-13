@@ -1151,7 +1151,7 @@
       clearPostedLocalOne(sakeId);
     }
 
-    // /reviews の「自分の1件」参照
+    // /reviews の「自分の1件」参照（docId固定）
     function myReviewDocId(sakeId, uid){
       return `${String(sakeId).slice(0,60)}_${String(uid).slice(0,80)}`;
     }
@@ -1174,15 +1174,10 @@
       if (!db) return null;
       await ensureMe();
 
-      // ローカルは投稿済みだが、実体が無いなら矛盾
-      const shouldCheck = hasPostedLocal(sakeId) || true; // 安全のため常にチェック
-      if (!shouldCheck) return null;
-
       let mine = null;
       try{
         mine = await getMyReview(sakeId);
       }catch(e){
-        // rulesや通信で見れない場合は何もしない
         console.warn("getMyReview failed", e);
         return null;
       }
@@ -1212,6 +1207,26 @@
       await db.collection(REVIEWS_COLLECTION).doc(docId).delete();
     }
 
+    // ✅ My Page 用：共有レビュー(/reviews) + 履歴(/users/.../reviewed) + local flag を全部消す
+    async function deleteMyReviewEverywhere(sakeId){
+      if (!db) throw new Error("Firestore not ready");
+      const u = await ensureMe();
+      const sid = String(sakeId || "").slice(0,60);
+
+      // 1) 共有レビュー本体
+      const docId = myReviewDocId(sid, u.uid);
+      await db.collection(REVIEWS_COLLECTION).doc(docId).delete().catch(()=>{});
+
+      // 2) 履歴
+      await db.collection(USERS_COLLECTION).doc(u.uid)
+        .collection("reviewed").doc(sid).delete().catch(()=>{});
+
+      // 3) 端末フラグ解除
+      clearPostedLocalOne(sid);
+
+      return true;
+    }
+
     function renderMyReviewedSection(reviewed){
       const listEl = document.getElementById("myReviewedList");
       if (!listEl) return;
@@ -1239,31 +1254,35 @@
           <div class="go">
             <a class="btn secondary" href="${c.url}">Open / 開く</a>
             <a class="btn secondary" href="${c.editUrl}">Edit / 訂正</a>
-            <button class="secondary" type="button" data-del="${escapeHtml(c.sakeId)}">Delete / 履歴削除</button>
+            <button class="secondary" type="button" data-del="${escapeHtml(c.sakeId)}">🗑️ Delete / 削除</button>
           </div>
         `;
         listEl.appendChild(card);
       });
 
-      // bind delete buttons
+      // bind delete buttons (FULL delete)
       listEl.querySelectorAll("button[data-del]").forEach(btn=>{
         btn.onclick = async () => {
           const sakeId = btn.getAttribute("data-del");
           if (!sakeId) return;
 
           const ok = confirm(
-            `「${sakeId}」を My Page から削除しますか？\n` +
-            `（この端末の投稿済みフラグも消えるので、再投稿できます）`
+            `この銘柄のレビューを削除しますか？\n\n` +
+            `・店内共有レビュー（みんなのレビュー）からも消えます\n` +
+            `・My Page の履歴からも消えます\n` +
+            `・この端末の投稿済みフラグも消えるので、再投稿できます\n\n` +
+            `続行しますか？`
           );
           if (!ok) return;
 
           try{
-            await deleteMyHistoryOnly(sakeId);
+            statusEl.textContent = "Deleting… / 削除中…";
+            await deleteMyReviewEverywhere(sakeId);
             await refreshMyPageAfterChange();
-            statusEl.textContent = "Deleted ✅ / 履歴を削除しました";
+            statusEl.textContent = "Deleted ✅ / 削除しました";
           }catch(e){
             console.error(e);
-            statusEl.textContent = "Delete failed / 削除失敗";
+            statusEl.textContent = "Delete failed / 削除失敗（Rules・通信を確認）";
           }
         };
       });
@@ -1405,7 +1424,7 @@
 
       const docId = myReviewDocId(clean.sakeId, u.uid);
 
-      // docId固定で「同一uidは上書き」(Rules側でupdateを許可している必要あり)
+      // docId固定で「同一uidは上書き」
       await db.collection(REVIEWS_COLLECTION).doc(docId).set(clean, { merge: true });
 
       // ローカルでもガード
@@ -1557,7 +1576,6 @@
         if (ratingEl && myReview.rating) ratingEl.value = String(myReview.rating);
         if (msgEl && myReview.msg) msgEl.value = myReview.msg;
       }else if (isEdit){
-        // edit=1 で来たのに自分のレビューが無ければ通常投稿として扱う
         statusEl.textContent = "Edit mode: no existing review. You can post new one ✅ / 訂正対象が無いので新規投稿できます";
       }
 
@@ -1608,8 +1626,8 @@
             markPostedLocal(currentSakeId);
 
             // UI
-            showPostedLocalHint(!canEdit); // 編集ではヒントを出さない（何度でも更新できる想定）
-            submitBtn.disabled = !canEdit; // 編集ならdisabledにしない
+            showPostedLocalHint(!canEdit);
+            submitBtn.disabled = !canEdit;
 
           }catch(err){
             console.error(err);
@@ -1620,43 +1638,7 @@
         };
       }
 
-      // ★編集/削除ボタン（ボトルページ内）
-      const formActions = document.querySelector(".form .actions");
-      if (formActions){
-        // 既に追加済みなら二重追加しない
-        if (!document.getElementById("deleteMyReviewBtn")){
-          const delBtn = document.createElement("button");
-          delBtn.id = "deleteMyReviewBtn";
-          delBtn.type = "button";
-          delBtn.className = "secondary";
-          delBtn.textContent = "🗑️ 自分のレビュー削除 / Delete my review";
-          delBtn.onclick = async () => {
-            const ok = confirm(
-              "この銘柄の「あなたのレビュー（共有）」を削除しますか？\n" +
-              "・店内共有のレビューからも消えます\n" +
-              "・My Page の履歴も消えます\n" +
-              "続行しますか？"
-            );
-            if (!ok) return;
-
-            try{
-              await deleteMySharedReview(currentSakeId);   // /reviews の自分の1件
-              await deleteMyHistoryOnly(currentSakeId);    // /users/{uid}/reviewed + local flag
-              showPostedLocalHint(false);
-              const submitBtn = document.getElementById("submitReviewBtn");
-              if (submitBtn){
-                submitBtn.disabled = false;
-                submitBtn.textContent = "投稿する / Post";
-              }
-              statusEl.textContent = "Deleted ✅ / 削除しました（再投稿できます）";
-            }catch(e){
-              console.error(e);
-              statusEl.textContent = "Delete failed / 削除失敗（Rulesを確認）";
-            }
-          };
-          formActions.appendChild(delBtn);
-        }
-      }
+      // ✅ 銘柄ページの「Delete my review」ボタンは不要なので追加しない（完全撤去）
 
       const exportBtn = document.getElementById("exportReviewsBtn");
       if (exportBtn){
