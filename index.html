@@ -682,6 +682,7 @@
 
     const qs = new URLSearchParams(location.search);
     const targetId = qs.get("id");
+    const isEdit = qs.get("edit") === "1"; // ★ edit mode
     let currentSakeId = null;
 
     // Firebase init
@@ -741,6 +742,10 @@
     function markPostedLocal(sakeId){
       const key = LS_POSTED_PREFIX + String(sakeId || "");
       localStorage.setItem(key, "1");
+    }
+    function clearPostedLocalOne(sakeId){
+      const key = LS_POSTED_PREFIX + String(sakeId || "");
+      localStorage.removeItem(key);
     }
     function clearPostedLocalAll(){
       for (let i=localStorage.length-1; i>=0; i--){
@@ -1095,6 +1100,118 @@
       return out;
     }
 
+    function computeMyReviewedCards(reviewed){
+      return (reviewed || []).map(s=>{
+        const sakeId = String(s.sakeId || s.id || "");
+        return {
+          sakeId,
+          url: `${location.pathname}?id=${encodeURIComponent(sakeId)}`,
+          editUrl: `${location.pathname}?id=${encodeURIComponent(sakeId)}&edit=1`,
+          jp: escapeHtml(s.name_jp || sakeId || "—"),
+          en: escapeHtml(s.name_en || ""),
+          region: escapeHtml(s.region_jp || ""),
+          style: escapeHtml(s.style_en || ""),
+        };
+      });
+    }
+
+    async function refreshMyPageAfterChange(){
+      let reviewed = [];
+      try{
+        reviewed = await loadMyReviewed();
+      }catch(e){
+        console.warn("reviewed load failed", e);
+        reviewed = [];
+      }
+      renderMyReviewedSection(reviewed);
+
+      try{
+        const mySvg = japanSvgByWrapId["myMapWrap"] || null;
+        const prefs = (reviewed || [])
+          .map(x => prefectureFromRegionJP(x.region_jp || ""))
+          .filter(Boolean);
+        highlightPrefsOnMap(mySvg, prefs);
+        const uniqueCount = new Set(prefs).size;
+        setText("myMapMeta", uniqueCount ? `Marked ${uniqueCount} prefectures` : "—");
+      }catch(e){
+        console.warn("My map paint skipped", e);
+      }
+    }
+
+    async function deleteMyHistoryOnly(sakeId){
+      const u = await ensureMe();
+
+      // Firestore: /users/{uid}/reviewed/{sakeId}
+      if (db){
+        await db.collection(USERS_COLLECTION).doc(u.uid)
+          .collection("reviewed").doc(String(sakeId)).delete().catch(()=>{});
+      }
+
+      // local posted flag
+      clearPostedLocalOne(sakeId);
+    }
+
+    // /reviews の「自分の1件」参照
+    function myReviewDocId(sakeId, uid){
+      return `${String(sakeId).slice(0,60)}_${String(uid).slice(0,80)}`;
+    }
+    function myReviewRef(sakeId){
+      if (!db) return null;
+      const u = auth?.currentUser;
+      if (!u?.uid) return null;
+      const docId = myReviewDocId(String(sakeId), String(u.uid));
+      return db.collection(REVIEWS_COLLECTION).doc(docId);
+    }
+    async function getMyReview(sakeId){
+      const ref = myReviewRef(sakeId);
+      if (!ref) return null;
+      const snap = await ref.get();
+      return snap.exists ? { id: snap.id, ...snap.data() } : null;
+    }
+
+    // ★ admin削除などで /reviews が無いのに「投稿済み扱い」の矛盾を解消
+    async function reconcileAfterAdminDeleteIfNeeded(sakeId){
+      if (!db) return null;
+      await ensureMe();
+
+      // ローカルは投稿済みだが、実体が無いなら矛盾
+      const shouldCheck = hasPostedLocal(sakeId) || true; // 安全のため常にチェック
+      if (!shouldCheck) return null;
+
+      let mine = null;
+      try{
+        mine = await getMyReview(sakeId);
+      }catch(e){
+        // rulesや通信で見れない場合は何もしない
+        console.warn("getMyReview failed", e);
+        return null;
+      }
+
+      // 自分のレビューが存在しないなら「履歴だけ残ってる」状態 → 掃除
+      if (!mine){
+        try{
+          await deleteMyHistoryOnly(sakeId);
+          showPostedLocalHint(false);
+
+          const submitBtn = document.getElementById("submitReviewBtn");
+          if (submitBtn) submitBtn.disabled = false;
+
+          statusEl.textContent = "Your review was removed. You can post again ✅ / 削除済みなので再投稿できます";
+        }catch(e){
+          console.warn("reconcile cleanup failed", e);
+        }
+      }
+
+      return mine;
+    }
+
+    async function deleteMySharedReview(sakeId){
+      if (!db) return;
+      const u = await ensureMe();
+      const docId = myReviewDocId(String(sakeId), String(u.uid));
+      await db.collection(REVIEWS_COLLECTION).doc(docId).delete();
+    }
+
     function renderMyReviewedSection(reviewed){
       const listEl = document.getElementById("myReviewedList");
       if (!listEl) return;
@@ -1110,23 +1227,45 @@
         return;
       }
 
-      reviewed.forEach(s=>{
-        const url = `${location.pathname}?id=${encodeURIComponent(s.sakeId || s.id)}`;
-        const jp = escapeHtml(s.name_jp || s.sakeId || s.id || "—");
-        const en = escapeHtml(s.name_en || "");
-        const region = escapeHtml(s.region_jp || "");
-        const style = escapeHtml(s.style_en || "");
+      const cards = computeMyReviewedCards(reviewed);
+
+      cards.forEach(c=>{
         const card = document.createElement("div");
         card.className = "item";
         card.innerHTML = `
-          <div class="n">✍️ ${jp}</div>
-          <div class="s">${en}</div>
-          <div class="badge">${style} · <span class="muted">${region}</span></div>
+          <div class="n">✍️ ${c.jp}</div>
+          <div class="s">${c.en}</div>
+          <div class="badge">${c.style} · <span class="muted">${c.region}</span></div>
           <div class="go">
-            <a class="btn secondary" href="${url}">Open / 開く</a>
+            <a class="btn secondary" href="${c.url}">Open / 開く</a>
+            <a class="btn secondary" href="${c.editUrl}">Edit / 訂正</a>
+            <button class="secondary" type="button" data-del="${escapeHtml(c.sakeId)}">Delete / 履歴削除</button>
           </div>
         `;
         listEl.appendChild(card);
+      });
+
+      // bind delete buttons
+      listEl.querySelectorAll("button[data-del]").forEach(btn=>{
+        btn.onclick = async () => {
+          const sakeId = btn.getAttribute("data-del");
+          if (!sakeId) return;
+
+          const ok = confirm(
+            `「${sakeId}」を My Page から削除しますか？\n` +
+            `（この端末の投稿済みフラグも消えるので、再投稿できます）`
+          );
+          if (!ok) return;
+
+          try{
+            await deleteMyHistoryOnly(sakeId);
+            await refreshMyPageAfterChange();
+            statusEl.textContent = "Deleted ✅ / 履歴を削除しました";
+          }catch(e){
+            console.error(e);
+            statusEl.textContent = "Delete failed / 削除失敗";
+          }
+        };
       });
     }
 
@@ -1250,10 +1389,6 @@
         });
     }
 
-    function myReviewDocId(sakeId, uid){
-      return `${String(sakeId).slice(0,60)}_${String(uid).slice(0,80)}`;
-    }
-
     async function postReviewShared(sakeId, {name, rating, msg}){
       if (!db) throw new Error("Firestore not ready");
       const u = await ensureMe();
@@ -1348,9 +1483,6 @@
       currentSakeId = it.id;
       document.getElementById("sheetCard").style.display = "";
 
-      // local posted hint
-      showPostedLocalHint(hasPostedLocal(currentSakeId));
-
       setText("name_jp", it.name_jp || it.id || "—");
       setText("name_en", it.name_en || "");
       setText("idTag", `id: ${it.id || "—"}`);
@@ -1386,7 +1518,7 @@
       setText("pairing", jpOrEn(it.pairing_jp, it.pairing_en));
 
       setText("storyText", buildStory(it));
-      setText("storyHint", "auto");
+      setText("storyHint", isEdit ? "edit" : "auto");
 
       const sweet = setBar("bar_sweet", it.sweet);
       const aroma = setBar("bar_aroma", it.aroma_intensity);
@@ -1406,23 +1538,48 @@
       const svg = japanSvgByWrapId["mapWrap"] || null;
       highlightPrefOnMap(svg, pref);
 
+      // ★ admin削除などの「残骸」をここで吸収
+      const myReview = await reconcileAfterAdminDeleteIfNeeded(it.id);
+
+      // local posted hint（reconcile後に判断）
+      const postedLocal = hasPostedLocal(currentSakeId);
+      showPostedLocalHint(postedLocal && !isEdit);
+
       // start listener
       listenReviewsShared(it.id);
+
+      // 編集モード or 既存レビューがあればプリフィル
+      if (myReview){
+        const nameEl = document.getElementById("rv_name");
+        const ratingEl = document.getElementById("rv_rating");
+        const msgEl = document.getElementById("rv_msg");
+        if (nameEl && myReview.name) nameEl.value = myReview.name;
+        if (ratingEl && myReview.rating) ratingEl.value = String(myReview.rating);
+        if (msgEl && myReview.msg) msgEl.value = myReview.msg;
+      }else if (isEdit){
+        // edit=1 で来たのに自分のレビューが無ければ通常投稿として扱う
+        statusEl.textContent = "Edit mode: no existing review. You can post new one ✅ / 訂正対象が無いので新規投稿できます";
+      }
 
       // submit
       const submitBtn = document.getElementById("submitReviewBtn");
       if (submitBtn){
-        submitBtn.disabled = hasPostedLocal(currentSakeId);
+        const canEdit = isEdit || !!myReview;
+
+        submitBtn.textContent = canEdit ? "更新する / Update" : "投稿する / Post";
+        submitBtn.disabled = (!canEdit && hasPostedLocal(currentSakeId));
+
         submitBtn.onclick = async () => {
           try{
-            if (hasPostedLocal(currentSakeId)){
+            // 通常投稿は「端末1回」ガード（編集は除外）
+            if (!canEdit && hasPostedLocal(currentSakeId)){
               showPostedLocalHint(true);
               statusEl.textContent = "Already posted on this device / この端末では投稿済みです";
               return;
             }
 
             await ensureMe();
-            debugAuth("post");
+            debugAuth(canEdit ? "update" : "post");
 
             let name = (document.getElementById("rv_name").value || "").trim();
             const rating = Number(document.getElementById("rv_rating").value || 5);
@@ -1445,10 +1602,14 @@
             await markReviewed(currentSakeId, window.__currentBottleMeta || null);
 
             document.getElementById("rv_msg").value = "";
-            statusEl.textContent = "Posted ✅ / 投稿しました";
+            statusEl.textContent = canEdit ? "Updated ✅ / 更新しました" : "Posted ✅ / 投稿しました";
 
-            showPostedLocalHint(true);
-            submitBtn.disabled = true;
+            // ローカルガード
+            markPostedLocal(currentSakeId);
+
+            // UI
+            showPostedLocalHint(!canEdit); // 編集ではヒントを出さない（何度でも更新できる想定）
+            submitBtn.disabled = !canEdit; // 編集ならdisabledにしない
 
           }catch(err){
             console.error(err);
@@ -1457,6 +1618,44 @@
             statusEl.textContent = `Post failed${code ? ` (${code})` : ""}: ${m}`;
           }
         };
+      }
+
+      // ★編集/削除ボタン（ボトルページ内）
+      const formActions = document.querySelector(".form .actions");
+      if (formActions){
+        // 既に追加済みなら二重追加しない
+        if (!document.getElementById("deleteMyReviewBtn")){
+          const delBtn = document.createElement("button");
+          delBtn.id = "deleteMyReviewBtn";
+          delBtn.type = "button";
+          delBtn.className = "secondary";
+          delBtn.textContent = "🗑️ 自分のレビュー削除 / Delete my review";
+          delBtn.onclick = async () => {
+            const ok = confirm(
+              "この銘柄の「あなたのレビュー（共有）」を削除しますか？\n" +
+              "・店内共有のレビューからも消えます\n" +
+              "・My Page の履歴も消えます\n" +
+              "続行しますか？"
+            );
+            if (!ok) return;
+
+            try{
+              await deleteMySharedReview(currentSakeId);   // /reviews の自分の1件
+              await deleteMyHistoryOnly(currentSakeId);    // /users/{uid}/reviewed + local flag
+              showPostedLocalHint(false);
+              const submitBtn = document.getElementById("submitReviewBtn");
+              if (submitBtn){
+                submitBtn.disabled = false;
+                submitBtn.textContent = "投稿する / Post";
+              }
+              statusEl.textContent = "Deleted ✅ / 削除しました（再投稿できます）";
+            }catch(e){
+              console.error(e);
+              statusEl.textContent = "Delete failed / 削除失敗（Rulesを確認）";
+            }
+          };
+          formActions.appendChild(delBtn);
+        }
       }
 
       const exportBtn = document.getElementById("exportReviewsBtn");
@@ -1541,7 +1740,7 @@
             };
           }
 
-          // ✅ reset device data (fixed id)
+          // ✅ reset device data
           const resetBtn = document.getElementById("resetBtn");
           if (resetBtn){
             resetBtn.onclick = async () => {
@@ -1549,30 +1748,8 @@
             };
           }
 
-          // reviewed load + map paint
-          let reviewed = [];
-          try{
-            reviewed = await loadMyReviewed();
-            renderMyReviewedSection(reviewed);
-          }catch(e){
-            console.warn("reviewed load failed", e);
-            renderMyReviewedSection([]);
-          }
-
-          try{
-            const mySvg = japanSvgByWrapId["myMapWrap"] || null;
-            const prefs = (reviewed || [])
-              .map(x => prefectureFromRegionJP(x.region_jp || ""))
-              .filter(Boolean);
-
-            highlightPrefsOnMap(mySvg, prefs);
-
-            const uniqueCount = new Set(prefs).size;
-            setText("myMapMeta", uniqueCount ? `Marked ${uniqueCount} prefectures` : "—");
-          }catch(e){
-            console.warn("My map paint skipped", e);
-          }
-
+          // 初回描画
+          await refreshMyPageAfterChange();
           renderAllBottles(items);
           return;
         }
