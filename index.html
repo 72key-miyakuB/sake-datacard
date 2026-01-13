@@ -397,6 +397,44 @@
       background: linear-gradient(90deg, rgba(215,181,109,.95), rgba(126,227,166,.85));
     }
     .distVal{ font-size: 12px; color: var(--muted); text-align:right; }
+
+    /* --- Bottle image faint background (cards) --- */
+    .item{
+    position: relative;
+    overflow: hidden;
+    }
+
+    /* うっすら画像レイヤー */
+    .item .bgimg{
+    position:absolute;
+    inset:0;
+    background-repeat:no-repeat;
+
+    /* 右下にボトルを小さく */
+    background-position: 90% 80%;
+    background-size: 120px auto;   /* ← ここが肝 */
+
+    opacity: .28;                 /* ラベル見える程度 */
+    filter: saturate(1.05) contrast(1.1);
+    pointer-events:none;
+    z-index:0;
+    }
+
+    /* 文字が読みやすいように暗幕グラデ */
+    .item .bgshade{
+    position:absolute;
+    inset:0;
+    background: linear-gradient(90deg, rgba(11,13,18,.92) 0%, rgba(11,13,18,.62) 55%, rgba(11,13,18,.35) 100%);
+    pointer-events:none;
+    z-index:0;
+    }
+
+    /* コンテンツを前面へ */
+    .item > *{
+    position: relative;
+    z-index:1;
+    }
+
   </style>
 </head>
 
@@ -1248,15 +1286,17 @@
         const card = document.createElement("div");
         card.className = "item";
         card.innerHTML = `
-          <div class="n">✍️ ${c.jp}</div>
-          <div class="s">${c.en}</div>
-          <div class="badge">${c.style} · <span class="muted">${c.region}</span></div>
-          <div class="go">
+        ${bgLayersHtml(c.sakeId)}
+        <div class="n">✍️ ${c.jp}</div>
+        <div class="s">${c.en}</div>
+        <div class="badge">${c.style} · <span class="muted">${c.region}</span></div>
+        <div class="go">
             <a class="btn secondary" href="${c.url}">Open / 開く</a>
             <a class="btn secondary" href="${c.editUrl}">Edit / 訂正</a>
-            <button class="secondary" type="button" data-del="${escapeHtml(c.sakeId)}">🗑️ Delete / 削除</button>
-          </div>
+            <button class="secondary" type="button" data-del="${escapeHtml(c.sakeId)}">Delete / 履歴削除</button>
+        </div>
         `;
+
         listEl.appendChild(card);
       });
 
@@ -1471,6 +1511,21 @@
       const jp = `${pick(it.region_jp,it.region_en)}の${pick(it.brewery_jp,it.brewery_en)}。${pick(it.style_jp,it.style_en)}${it.rice_jp ? `（${it.rice_jp}）` : ""}の魅力。${it.aroma_jp ? `香り：${it.aroma_jp}。` : ""}${it.palate_jp ? `味わい：${it.palate_jp}。` : ""}`.replace(/\s+/g," ").trim();
       return jpOrEn(jp, en);
     }
+    
+    // --- Bottle image faint background helper ---
+    function bottleImgUrlById(id){
+    // index.html と同階層の image/ に {id}.png
+    return `./image/${encodeURIComponent(String(id || "").trim())}.png`;
+    }
+
+    function bgLayersHtml(id){
+    const url = bottleImgUrlById(id);
+    // 画像が無くてもbackground-imageが効かないだけで崩れません（404でも表示は継続）
+    return `
+        <div class="bgimg" style="background-image:url('${url}')"></div>
+        <div class="bgshade"></div>
+    `;
+    }
 
     // ---------- render all bottles (staff) ----------
     function renderAllBottles(items){
@@ -1485,13 +1540,15 @@
         const type = pick(it["分類タイプ"], it.style_en, it.style_jp, "—");
         const region = pick(it.region_en, it.region_jp, "—");
         card.innerHTML = `
-          <div class="n">${escapeHtml(it.name_jp || it.id || "—")}</div>
-          <div class="s">${escapeHtml(it.name_en || "")}</div>
-          <div class="badge">${escapeHtml(type)} · <span class="muted">${escapeHtml(region)}</span></div>
-          <div class="go">
+        ${bgLayersHtml(it.id)}
+        <div class="n">${escapeHtml(it.name_jp || it.id || "—")}</div>
+        <div class="s">${escapeHtml(it.name_en || "")}</div>
+        <div class="badge">${escapeHtml(type)} · <span class="muted">${escapeHtml(region)}</span></div>
+        <div class="go">
             <a class="btn secondary" href="${url}">Open / 開く</a>
-          </div>
+        </div>
         `;
+
         list.appendChild(card);
       });
     }
