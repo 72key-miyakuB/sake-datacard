@@ -447,28 +447,21 @@
       z-index:0;
     }
 
-    /* 中身を前に出す */
-    #sheetCard > *{
-      position:relative;
-      z-index:1;
-    }
-
-    /* ★ bottle background layer for sheetCard */
+    /* ====== sheet background ====== */
     #sheetCard{ position:relative; }
-    #sheetBg.sheetBg{
+    #sheetBg{
       position:absolute;
       inset:0;
       pointer-events:none;
       z-index:0;
-
       background-repeat:no-repeat;
-      background-size: 360px auto;      /* ← ここでサイズ調整 */
-      background-position: 90% 80%;     /* ← いま良いと言ってた値 */
-      opacity: .10;                     /* うっすら */
-      filter: saturate(1.05) contrast(1.05);
+      background-position: 90% 80%;
+      background-size: 260px auto;  /* 小さめ */
+      opacity: .12;                 /* うっすら */
+      filter: saturate(1.05) contrast(1.1);
     }
 
-    /* ★ content should be above the bg */
+    /* sheetCard内の通常コンテンツは前面 */
     #sheetCard .hd,
     #sheetCard .body,
     #sheetCard .footnote{
@@ -476,6 +469,25 @@
       z-index:1;
     }
 
+    /* ====== review background (inside reviewHead only) ====== */
+    #reviewHead{ position:relative; overflow:hidden; }
+    #reviewBg{
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      z-index:0;
+      background-repeat:no-repeat;
+      background-position: 90% 80%;
+      background-size: 120px auto;  /* ラベル見えるサイズ */
+      opacity: .18;
+      filter: saturate(1.05) contrast(1.1);
+    }
+
+    /* reviewHeadの中身を前面に */
+    #reviewHead > *{
+      position:relative;
+      z-index:1;
+    }
   </style>
 </head>
 
@@ -492,7 +504,11 @@
     <main class="grid">
       <section class="card" id="sheetCard" style="display:none;">
         <div id="sheetBg" class="sheetBg" aria-hidden="true"></div>
-        <div id="reviewBg" class="reviewBg"></div>
+
+        <!-- レビュー領域だけに薄く出す用（reviewHeadの中で使う） -->
+        <div class="reviewHead" id="reviewHead">
+          <div id="reviewBg" class="reviewBg" aria-hidden="true"></div>
+        
         <div class="hd">
           <div class="title">
             <div class="jp" id="name_jp">—</div>
@@ -765,12 +781,6 @@
     const targetId = qs.get("id");
     const isEdit = qs.get("edit") === "1"; // ★ edit mode
     let currentSakeId = null;
-
-    // ★ ここに入れる（ラベル背景用）
-    const reviewBg = document.getElementById("reviewBg");
-    if (reviewBg && targetId) {
-      reviewBg.style.backgroundImage = `url(image/${targetId}.png)`;
-    }
 
     // Firebase init
     let db = null;
@@ -1606,13 +1616,17 @@
       window.__currentBottleMeta = it;
 
       currentSakeId = it.id;
-      document.getElementById("sheetCard").style.display = "";
+      // ★ set background images (sheet + review)
+      const sid = String(currentSakeId || "").trim();
+      const url = `./image/${encodeURIComponent(sid)}.png`;
 
-      // ★ bottle bg on sheetCard
       const sheetBg = document.getElementById("sheetBg");
-      if (sheetBg && currentSakeId) {
-        sheetBg.style.backgroundImage = `url(./image/${currentSakeId}.png)`;
-      }
+      if (sheetBg) sheetBg.style.backgroundImage = `url("${url}")`;
+
+      const reviewBg = document.getElementById("reviewBg");
+      if (reviewBg) reviewBg.style.backgroundImage = `url("${url}")`;
+
+      document.getElementById("sheetCard").style.display = "";
 
       setText("name_jp", it.name_jp || it.id || "—");
       setText("name_en", it.name_en || "");
