@@ -435,6 +435,23 @@
     z-index:1;
     }
 
+    .reviewBg{
+      position:absolute;
+      inset:0;
+      background-repeat:no-repeat;
+      background-position: 90% 80%;
+      background-size: 120px auto;
+      opacity:.22;
+      filter: saturate(1.05) contrast(1.1);
+      pointer-events:none;
+      z-index:0;
+    }
+
+    /* 中身を前に出す */
+    #sheetCard > *{
+      position:relative;
+      z-index:1;
+    }
   </style>
 </head>
 
@@ -450,6 +467,7 @@
 
     <main class="grid">
       <section class="card" id="sheetCard" style="display:none;">
+        <div id="reviewBg" class="reviewBg"></div>
         <div class="hd">
           <div class="title">
             <div class="jp" id="name_jp">—</div>
@@ -722,6 +740,12 @@
     const targetId = qs.get("id");
     const isEdit = qs.get("edit") === "1"; // ★ edit mode
     let currentSakeId = null;
+
+    // ★ ここに入れる（ラベル背景用）
+    const reviewBg = document.getElementById("reviewBg");
+    if (reviewBg && targetId) {
+      reviewBg.style.backgroundImage = `url(image/${targetId}.png)`;
+    }
 
     // Firebase init
     let db = null;
