@@ -341,6 +341,34 @@
     .item .s{ color: var(--muted); font-size: 12px; }
     .item .go{ margin-top:auto; display:flex; gap:10px; flex-wrap:wrap; }
 
+    /* --- SOLD OUT styling --- */
+    .item.soldout{
+      opacity: .55;
+      filter: grayscale(.35) saturate(.7) contrast(1.05);
+    }
+
+    /* 背景ボトルも少し弱める */
+    .item.soldout .bgimg{
+      opacity: .16;
+    }
+
+    /* SOLD OUT ラベル（不要なら消してOK） */
+    .item.soldout::after{
+      content:"SOLD OUT";
+      position:absolute;
+      top:10px;
+      right:10px;
+      font-size:11px;
+      letter-spacing:.12em;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.16);
+      background: rgba(0,0,0,.35);
+      color: rgba(255,255,255,.78);
+      z-index:2;
+      pointer-events:none;
+    }
+
     .ratingTop{
       display:flex; gap:12px; align-items:flex-start; justify-content:space-between;
       flex-wrap:wrap;
@@ -834,6 +862,17 @@
       }
       return "";
     }
+
+    function getStockText(it){
+    // CSVの列名に合わせて増やせます
+    return pick(it["在庫"], it.stock, it.Stock, it.zaiko, it["stock"]);
+    }
+
+  function isSoldOut(it){
+    const s = String(getStockText(it) || "").trim();
+    return s === "在庫なし" || s.toLowerCase() === "soldout" || s.toLowerCase() === "sold out";
+    }
+
     function setText(id, value){
       const el = document.getElementById(id);
       if (el) el.textContent = value ?? "—";
@@ -1352,6 +1391,9 @@
       cards.forEach(c=>{
         const card = document.createElement("div");
         card.className = "item";
+        const meta = window.__itemsById?.get(String(c.sakeId)) || null;
+        if (meta && isSoldOut(meta)) card.classList.add("soldout");
+
         card.innerHTML = `
         ${bgLayersHtml(c.sakeId)}
         <div class="n">✍️ ${c.jp}</div>
@@ -1603,6 +1645,8 @@
       items.forEach(it=>{
         const card = document.createElement("div");
         card.className = "item";
+        if (isSoldOut(it)) card.classList.add("soldout");
+
         const url = `${location.pathname}?id=${encodeURIComponent(it.id)}`;
         const type = pick(it["分類タイプ"], it.style_en, it.style_jp, "—");
         const region = pick(it.region_en, it.region_jp, "—");
@@ -1819,6 +1863,8 @@
         if(!res.ok) throw new Error("CSV fetch failed: " + res.status);
         const text = await res.text();
         const items = parseCSV(text);
+        window.__items = items;
+        window.__itemsById = new Map(items.map(x => [String(x.id), x]));
 
         statusEl.textContent = `CSV loaded ✅ (${items.length}) · ${statusEl.textContent}`;
 
