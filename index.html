@@ -336,6 +336,8 @@
       padding: 12px;
       display:flex; flex-direction:column; gap:8px;
       min-width:0;
+      position: relative;
+      overflow: hidden;
     }
     .item .n{ font-weight: 820; }
     .item .s{ color: var(--muted); font-size: 12px; }
@@ -346,13 +348,7 @@
       opacity: .55;
       filter: grayscale(.35) saturate(.7) contrast(1.05);
     }
-
-    /* 背景ボトルも少し弱める */
-    .item.soldout .bgimg{
-      opacity: .16;
-    }
-
-    /* SOLD OUT ラベル（不要なら消してOK） */
+    .item.soldout .bgimg{ opacity: .16; }
     .item.soldout::after{
       content:"SOLD OUT";
       position:absolute;
@@ -427,83 +423,52 @@
     .distVal{ font-size: 12px; color: var(--muted); text-align:right; }
 
     /* --- Bottle image faint background (cards) --- */
-    .item{
-    position: relative;
-    overflow: hidden;
-    }
-
-    /* うっすら画像レイヤー */
     .item .bgimg{
-    position:absolute;
-    inset:0;
-    background-repeat:no-repeat;
-
-    /* 右下にボトルを小さく */
-    background-position: 90% 80%;
-    background-size: 120px auto;   /* ← ここが肝 */
-
-    opacity: .28;                 /* ラベル見える程度 */
-    filter: saturate(1.05) contrast(1.1);
-    pointer-events:none;
-    z-index:0;
-    }
-
-    /* 文字が読みやすいように暗幕グラデ */
-    .item .bgshade{
-    position:absolute;
-    inset:0;
-    background: linear-gradient(90deg, rgba(11,13,18,.92) 0%, rgba(11,13,18,.62) 55%, rgba(11,13,18,.35) 100%);
-    pointer-events:none;
-    z-index:0;
-    }
-
-    /* コンテンツを前面へ */
-    .item > *{
-    position: relative;
-    z-index:1;
-    }
-
-    .reviewBg{
       position:absolute;
       inset:0;
       background-repeat:no-repeat;
       background-position: 90% 80%;
       background-size: 120px auto;
-      opacity:.22;
+      opacity: .28;
       filter: saturate(1.05) contrast(1.1);
       pointer-events:none;
       z-index:0;
     }
+    .item .bgshade{
+      position:absolute;
+      inset:0;
+      background: linear-gradient(90deg, rgba(11,13,18,.92) 0%, rgba(11,13,18,.62) 55%, rgba(11,13,18,.35) 100%);
+      pointer-events:none;
+      z-index:0;
+    }
+    .item > *{
+      position: relative;
+      z-index:1;
+    }
 
-/* ★ bottle background layer for sheetCard (TOP ONLY) */
-#sheetCard{ position:relative; overflow:hidden; }
+    /* ★ bottle background layer for sheetCard (TOP ONLY) */
+    #sheetCard{ position:relative; overflow:hidden; }
 
-/* 上部（〜スペックぐらい）にだけ背景を出す */
-#sheetBg.sheetBg{
-  position:absolute;
-  left:0; right:0; top:0;
-  height: 360px;            /* ← “スペックまで”に収める高さ。足りなければ 320〜420で調整 */
-  pointer-events:none;
-  z-index:0;
-
-  background-repeat:no-repeat;
-  background-size: 220px auto;   /* ← 小さく */
-  background-position: 92% 80%;  /* ← 上に上げる（%の2つ目を小さくすると上へ） */
-  opacity: .12;                  /* ← うっすら */
-  filter: saturate(1.05) contrast(1.05);
-
-  /* 下に向かって自然に消す（境界が見えない） */
-  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 70%, transparent 100%);
-  mask-image: linear-gradient(to bottom, #000 0%, #000 70%, transparent 100%);
-}
-
-/* ★ content should be above the bg */
-#sheetCard .hd,
-#sheetCard .body,
-#sheetCard .footnote{
-  position:relative;
-  z-index:1;
-}
+    #sheetBg.sheetBg{
+      position:absolute;
+      left:0; right:0; top:0;
+      height: 360px;
+      pointer-events:none;
+      z-index:0;
+      background-repeat:no-repeat;
+      background-size: 220px auto;
+      background-position: 92% 80%;
+      opacity: .12;
+      filter: saturate(1.05) contrast(1.05);
+      -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 70%, transparent 100%);
+      mask-image: linear-gradient(to bottom, #000 0%, #000 70%, transparent 100%);
+    }
+    #sheetCard .hd,
+    #sheetCard .body,
+    #sheetCard .footnote{
+      position:relative;
+      z-index:1;
+    }
 
     /* ====== review background (inside reviewHead only) ====== */
     #reviewHead{ position:relative; overflow:hidden; }
@@ -514,15 +479,29 @@
       z-index:0;
       background-repeat:no-repeat;
       background-position: 90% 80%;
-      background-size: 120px auto;  /* ラベル見えるサイズ */
+      background-size: 120px auto;
       opacity: .18;
       filter: saturate(1.05) contrast(1.1);
     }
+    #reviewHead > *{ position:relative; z-index:1; }
 
-    /* reviewHeadの中身を前面に */
-    #reviewHead > *{
-      position:relative;
-      z-index:1;
+    /* score badge (BOTTOM-RIGHT) */
+    .scoreBadge{
+      position:absolute;
+      right:10px;
+      bottom:10px;
+      z-index:2;
+      font-size: 11px;
+      padding: 6px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(0,0,0,.35);
+      color: rgba(255,255,255,.92);
+      backdrop-filter: blur(6px);
+    }
+    .scoreBadge small{
+      color: var(--muted);
+      font-size: 10px;
     }
   </style>
 </head>
@@ -538,13 +517,10 @@
     </header>
 
     <main class="grid">
+      <!-- Bottle page -->
       <section class="card" id="sheetCard" style="display:none;">
         <div id="sheetBg" class="sheetBg" aria-hidden="true"></div>
 
-        <!-- レビュー領域だけに薄く出す用（reviewHeadの中で使う） -->
-        <div class="reviewHead" id="reviewHead">
-          <div id="reviewBg" class="reviewBg" aria-hidden="true"></div>
-        
         <div class="hd">
           <div class="title">
             <div class="jp" id="name_jp">—</div>
@@ -635,34 +611,37 @@
             <div class="hint muted">※ CSV: (sweet, aroma_intensity, body, acidity)</div>
           </div>
 
-          <div class="reviewHead">
+          <!-- Reviews section (ONE ONLY) -->
+          <div class="reviewHead" id="reviewHead">
+            <div id="reviewBg" aria-hidden="true"></div>
+
             <div class="h1">
               <span>✍️ Reviews / 感想を書く・読む</span>
               <span class="badge" id="ratingBadge">—</span>
+            </div>
 
-              <div class="ratingSummary" id="ratingSummary" style="margin-top:10px;">
-                <div class="ratingTop">
-                  <div class="ratingBig">
-                    <div class="ratingAvg" id="avgBig">—</div>
-                    <div class="ratingMeta" id="countBig">—</div>
-                  </div>
-                  <div class="ratingSide">
-                    <div class="ratingLine"><span class="muted">★4–5率</span><span id="pct45">—</span></div>
-                    <div class="ratingLine"><span class="muted">★1–2率</span><span id="pct12">—</span></div>
-                    <div class="ratingLine"><span class="muted">最多</span><span id="modeStar">—</span></div>
-                  </div>
+            <div class="ratingSummary" id="ratingSummary" style="margin-top:10px;">
+              <div class="ratingTop">
+                <div class="ratingBig">
+                  <div class="ratingAvg" id="avgBig">—</div>
+                  <div class="ratingMeta" id="countBig">—</div>
                 </div>
-
-                <div class="dist" aria-label="Rating distribution">
-                  <div class="distRow"><span class="distLbl">5</span><div class="distBar"><i id="bar5"></i></div><span class="distVal" id="val5">—</span></div>
-                  <div class="distRow"><span class="distLbl">4</span><div class="distBar"><i id="bar4"></i></div><span class="distVal" id="val4">—</span></div>
-                  <div class="distRow"><span class="distLbl">3</span><div class="distBar"><i id="bar3"></i></div><span class="distVal" id="val3">—</span></div>
-                  <div class="distRow"><span class="distLbl">2</span><div class="distBar"><i id="bar2"></i></div><span class="distVal" id="val2">—</span></div>
-                  <div class="distRow"><span class="distLbl">1</span><div class="distBar"><i id="bar1"></i></div><span class="distVal" id="val1">—</span></div>
+                <div class="ratingSide">
+                  <div class="ratingLine"><span class="muted">★4–5率</span><span id="pct45">—</span></div>
+                  <div class="ratingLine"><span class="muted">★1–2率</span><span id="pct12">—</span></div>
+                  <div class="ratingLine"><span class="muted">最多</span><span id="modeStar">—</span></div>
                 </div>
-
-                <div class="hint muted" style="margin-top:8px;">※ 分布はこの銘柄の全レビュー（共有）から集計</div>
               </div>
+
+              <div class="dist" aria-label="Rating distribution">
+                <div class="distRow"><span class="distLbl">5</span><div class="distBar"><i id="bar5"></i></div><span class="distVal" id="val5">—</span></div>
+                <div class="distRow"><span class="distLbl">4</span><div class="distBar"><i id="bar4"></i></div><span class="distVal" id="val4">—</span></div>
+                <div class="distRow"><span class="distLbl">3</span><div class="distBar"><i id="bar3"></i></div><span class="distVal" id="val3">—</span></div>
+                <div class="distRow"><span class="distLbl">2</span><div class="distBar"><i id="bar2"></i></div><span class="distVal" id="val2">—</span></div>
+                <div class="distRow"><span class="distLbl">1</span><div class="distBar"><i id="bar1"></i></div><span class="distVal" id="val1">—</span></div>
+              </div>
+
+              <div class="hint muted" style="margin-top:8px;">※ 分布はこの銘柄の全レビュー（共有）から集計</div>
             </div>
 
             <p class="desc">
@@ -725,6 +704,7 @@
         </div>
       </section>
 
+      <!-- My Page -->
       <section class="card" id="listCard" style="display:none;">
         <div class="hd">
           <div class="title">
@@ -751,7 +731,6 @@
               </span>
             </p>
             <div class="actions" style="margin-top:10px;">
-              <button class="secondary" id="changeNameBtn" type="button">名前を変更 / Change name</button>
               <button class="secondary" id="resetBtn" type="button">端末データ初期化 / Reset</button>
             </div>
             <div class="hint muted">※ 名前を変えると次回以降の投稿名が変わります（過去レビューの表示名は変わりません）。</div>
@@ -773,6 +752,10 @@
           <div class="list" id="myReviewedList" style="margin-top:10px;"></div>
 
           <div class="hr"></div>
+
+          <div class="badge">🏆 平均得点ランキングTOP5</div>
+          <div class="list" id="top5List" style="margin-top:10px;"></div>
+          <div class="hint muted">※ 店内共有レビュー（Firestore）の平均点で集計</div>
 
           <div class="badge muted">🔎 All bottles / 全銘柄（スタッフ用）</div>
           <div class="list" id="list" style="margin-top:10px;"></div>
@@ -864,13 +847,11 @@
     }
 
     function getStockText(it){
-    // CSVの列名に合わせて増やせます
-    return pick(it["在庫"], it.stock, it.Stock, it.zaiko, it["stock"]);
+      return pick(it["在庫"], it.stock, it.Stock, it.zaiko, it["stock"]);
     }
-
-  function isSoldOut(it){
-    const s = String(getStockText(it) || "").trim();
-    return s === "在庫なし" || s.toLowerCase() === "soldout" || s.toLowerCase() === "sold out";
+    function isSoldOut(it){
+      const s = String(getStockText(it) || "").trim();
+      return s === "在庫なし" || s.toLowerCase() === "soldout" || s.toLowerCase() === "sold out";
     }
 
     function setText(id, value){
@@ -1209,17 +1190,14 @@
         me = me || await initAuth();
         debugAuth("reset");
 
-        // 1) localStorage をクリア
         localStorage.removeItem(LS_NAME_KEY);
         clearPostedLocalAll();
 
-        // 2) Firestore: /users/{uid}/reviewed を全削除
         if (db && me){
           const col = db.collection(USERS_COLLECTION).doc(me.uid).collection("reviewed");
           await deleteCollectionInBatches(col, 450);
         }
 
-        // 3) UI反映（＆キャッシュ対策：リロード）
         statusEl.textContent = "Reset ✅ / 端末データを初期化しました。再読み込みします…";
         location.reload();
       }catch(e){
@@ -1251,10 +1229,10 @@
           sakeId,
           url: `${location.pathname}?id=${encodeURIComponent(sakeId)}`,
           editUrl: `${location.pathname}?id=${encodeURIComponent(sakeId)}&edit=1`,
-          jp: escapeHtml(s.name_jp || sakeId || "—"),
-          en: escapeHtml(s.name_en || ""),
-          region: escapeHtml(s.region_jp || ""),
-          style: escapeHtml(s.style_en || ""),
+          jp: (s.name_jp || sakeId || "—"),
+          en: (s.name_en || ""),
+          region: (s.region_jp || ""),
+          style: (s.style_en || ""),
         };
       });
     }
@@ -1267,7 +1245,18 @@
         console.warn("reviewed load failed", e);
         reviewed = [];
       }
-      renderMyReviewedSection(reviewed);
+
+      // ✅ My Reviewsに出る銘柄だけ平均点を取得
+      let myRatingStats = {};
+      try{
+        const ids = (reviewed || []).map(r => String(r.sakeId || r.id || "")).filter(Boolean);
+        myRatingStats = await loadRatingStatsForAll(ids);
+      }catch(e){
+        console.warn("my ratingStats failed", e);
+        myRatingStats = {};
+      }
+
+      renderMyReviewedSection(reviewed, myRatingStats);
 
       try{
         const mySvg = japanSvgByWrapId["myMapWrap"] || null;
@@ -1285,13 +1274,11 @@
     async function deleteMyHistoryOnly(sakeId){
       const u = await ensureMe();
 
-      // Firestore: /users/{uid}/reviewed/{sakeId}
       if (db){
         await db.collection(USERS_COLLECTION).doc(u.uid)
           .collection("reviewed").doc(String(sakeId)).delete().catch(()=>{});
       }
 
-      // local posted flag
       clearPostedLocalOne(sakeId);
     }
 
@@ -1313,7 +1300,6 @@
       return snap.exists ? { id: snap.id, ...snap.data() } : null;
     }
 
-    // ★ admin削除などで /reviews が無いのに「投稿済み扱い」の矛盾を解消
     async function reconcileAfterAdminDeleteIfNeeded(sakeId){
       if (!db) return null;
       await ensureMe();
@@ -1326,7 +1312,6 @@
         return null;
       }
 
-      // 自分のレビューが存在しないなら「履歴だけ残ってる」状態 → 掃除
       if (!mine){
         try{
           await deleteMyHistoryOnly(sakeId);
@@ -1344,34 +1329,22 @@
       return mine;
     }
 
-    async function deleteMySharedReview(sakeId){
-      if (!db) return;
-      const u = await ensureMe();
-      const docId = myReviewDocId(String(sakeId), String(u.uid));
-      await db.collection(REVIEWS_COLLECTION).doc(docId).delete();
-    }
-
-    // ✅ My Page 用：共有レビュー(/reviews) + 履歴(/users/.../reviewed) + local flag を全部消す
     async function deleteMyReviewEverywhere(sakeId){
       if (!db) throw new Error("Firestore not ready");
       const u = await ensureMe();
       const sid = String(sakeId || "").slice(0,60);
 
-      // 1) 共有レビュー本体
       const docId = myReviewDocId(sid, u.uid);
       await db.collection(REVIEWS_COLLECTION).doc(docId).delete().catch(()=>{});
 
-      // 2) 履歴
       await db.collection(USERS_COLLECTION).doc(u.uid)
         .collection("reviewed").doc(sid).delete().catch(()=>{});
 
-      // 3) 端末フラグ解除
       clearPostedLocalOne(sid);
-
       return true;
     }
 
-    function renderMyReviewedSection(reviewed){
+    function renderMyReviewedSection(reviewed, ratingStats = {}){
       const listEl = document.getElementById("myReviewedList");
       if (!listEl) return;
       listEl.innerHTML = "";
@@ -1394,22 +1367,29 @@
         const meta = window.__itemsById?.get(String(c.sakeId)) || null;
         if (meta && isSoldOut(meta)) card.classList.add("soldout");
 
-        card.innerHTML = `
-        ${bgLayersHtml(c.sakeId)}
-        <div class="n">✍️ ${c.jp}</div>
-        <div class="s">${c.en}</div>
-        <div class="badge">${c.style} · <span class="muted">${c.region}</span></div>
-        <div class="go">
-            <a class="btn secondary" href="${c.url}">Open / 開く</a>
-            <a class="btn secondary" href="${c.editUrl}">Edit / 訂正</a>
-            <button class="secondary" type="button" data-del="${escapeHtml(c.sakeId)}">Delete / 履歴削除</button>
-        </div>
-        `;
+        const st = ratingStats?.[c.sakeId] || { avg: null, count: 0 };
+        const avgText = Number.isFinite(st.avg) ? st.avg.toFixed(1) : "—";
+        const cntText = st.count ? `(${st.count})` : "(0)";
+
+        card.innerHTML = cardHtmlCommon({
+          it: {
+            id: c.sakeId,
+            name_jp: c.jp,
+            name_en: c.en,
+            style_en: c.style,
+            region_en: c.region
+          },
+          url: c.url,
+          avgText,
+          cntText,
+          showEdit: true,
+          showDelete: true,
+          editUrl: c.editUrl
+        });
 
         listEl.appendChild(card);
       });
 
-      // bind delete buttons (FULL delete)
       listEl.querySelectorAll("button[data-del]").forEach(btn=>{
         btn.onclick = async () => {
           const sakeId = btn.getAttribute("data-del");
@@ -1434,6 +1414,97 @@
             statusEl.textContent = "Delete failed / 削除失敗（Rules・通信を確認）";
           }
         };
+      });
+    }
+
+    // ---------- Rating stats (avg per bottle) ----------
+    async function fetchAvgForSakeId(sakeId){
+      if (!db) return { avg: null, count: 0 };
+
+      const snap = await db.collection(REVIEWS_COLLECTION)
+        .where("sakeId", "==", String(sakeId))
+        .get();
+
+      let sum = 0;
+      let count = 0;
+      snap.forEach(doc=>{
+        const r = doc.data() || {};
+        const rating = Number(r.rating);
+        if (Number.isFinite(rating)){
+          sum += rating;
+          count += 1;
+        }
+      });
+
+      return {
+        avg: count ? (sum / count) : null,
+        count
+      };
+    }
+
+    async function loadRatingStatsForAll(ids){
+      const out = {};
+      await Promise.all((ids || []).map(async (id)=>{
+        try{
+          out[id] = await fetchAvgForSakeId(id);
+        }catch(e){
+          console.warn("avg fetch failed:", id, e);
+          out[id] = { avg: null, count: 0 };
+        }
+      }));
+      return out;
+    }
+
+    function renderTop5(items, ratingStats){
+      const box = document.getElementById("top5List");
+      if (!box) return;
+      box.innerHTML = "";
+
+      const rows = (items || []).map(it=>{
+        const st = ratingStats?.[it.id] || { avg: null, count: 0 };
+        return { it, ...st };
+      });
+
+      rows.sort((a,b)=>{
+        const aa = Number.isFinite(a.avg) ? a.avg : -1;
+        const bb = Number.isFinite(b.avg) ? b.avg : -1;
+        if (bb !== aa) return bb - aa;
+        return (b.count||0) - (a.count||0);
+      });
+
+      const top = rows.slice(0,5);
+
+      if (top.length === 0 || !Number.isFinite(top[0].avg)){
+        box.innerHTML = `
+          <div class="item" style="grid-column:1/-1;">
+            <div class="n">まだランキングは作れません</div>
+            <div class="s">レビューが付くと平均点からTOP5を表示します。</div>
+          </div>
+        `;
+        return;
+      }
+
+      top.forEach((x, idx)=>{
+        const it = x.it;
+        const url = `${location.pathname}?id=${encodeURIComponent(it.id)}`;
+
+        const avgText = Number.isFinite(x.avg) ? x.avg.toFixed(1) : "—";
+        const cntText = x.count ? `(${x.count})` : "(0)";
+
+        const card = document.createElement("div");
+        card.className = "item" + (isSoldOut(it) ? " soldout" : "");
+
+        card.innerHTML = cardHtmlCommon({
+          it,
+          url,
+          avgText,
+          cntText,
+          rankText: `#${idx+1}`,
+          showEdit: false,
+          showDelete: false
+        });
+
+        box.appendChild(card);
       });
     }
 
@@ -1573,11 +1644,10 @@
 
       const docId = myReviewDocId(clean.sakeId, u.uid);
 
-      // docId固定で「同一uidは上書き」
+      // ✅ create/update どちらも1本化（同一ユーザーは同一銘柄1件）
       await db.collection(REVIEWS_COLLECTION).doc(docId).set(clean, { merge: true });
 
-      // ローカルでもガード
-      markPostedLocal(clean.sakeId);
+      return true;
     }
 
     async function markReviewed(sakeId, bottleMeta){
@@ -1620,46 +1690,66 @@
       const jp = `${pick(it.region_jp,it.region_en)}の${pick(it.brewery_jp,it.brewery_en)}。${pick(it.style_jp,it.style_en)}${it.rice_jp ? `（${it.rice_jp}）` : ""}の魅力。${it.aroma_jp ? `香り：${it.aroma_jp}。` : ""}${it.palate_jp ? `味わい：${it.palate_jp}。` : ""}`.replace(/\s+/g," ").trim();
       return jpOrEn(jp, en);
     }
-    
+
     // --- Bottle image faint background helper ---
     function bottleImgUrlById(id){
-    // index.html と同階層の image/ に {id}.png
-    return `./image/${encodeURIComponent(String(id || "").trim())}.png`;
+      return `./image/${encodeURIComponent(String(id || "").trim())}.png`;
     }
-
     function bgLayersHtml(id){
-    const url = bottleImgUrlById(id);
-    // 画像が無くてもbackground-imageが効かないだけで崩れません（404でも表示は継続）
-    return `
+      const url = bottleImgUrlById(id);
+      return `
         <div class="bgimg" style="background-image:url('${url}')"></div>
         <div class="bgshade"></div>
-    `;
+      `;
     }
 
-    // ---------- render all bottles (staff) ----------
-    function renderAllBottles(items){
+    function cardHtmlCommon({
+      it, url,
+      avgText="—", cntText="(0)", rankText="",
+      showEdit=false, showDelete=false, editUrl=""
+    }) {
+      const typeText = pick(it["分類タイプ"], it.style_en, it.style_jp, "—");
+      const regionText = pick(it.region_en, it.region_jp, "—");
+
+      const showScore = (avgText !== null && avgText !== undefined && String(avgText).trim() !== "");
+      return `
+        ${bgLayersHtml(it.id)}
+        ${showScore ? `<div class="scoreBadge">★ ${escapeHtml(avgText)} <small>${escapeHtml(cntText)}</small></div>` : ""}
+
+        <div class="n">${rankText ? `${escapeHtml(rankText)} ` : ""}${escapeHtml(it.name_jp || it.id || "—")}</div>
+        <div class="s">${escapeHtml(it.name_en || "")}</div>
+        <div class="badge">${escapeHtml(typeText)} · <span class="muted">${escapeHtml(regionText)}</span></div>
+
+        <div class="go">
+          <a class="btn secondary" href="${url}">Open / 開く</a>
+          ${showEdit ? `<a class="btn secondary" href="${editUrl || (url + "&edit=1")}">Edit / 訂正</a>` : ""}
+          ${showDelete ? `<button class="secondary" type="button" data-del="${escapeHtml(it.id)}">Delete / 履歴削除</button>` : ""}
+        </div>
+      `;
+    }
+
+    function renderAllBottles(items, ratingStats){
       const list = document.getElementById("list");
       if (!list) return;
       list.innerHTML = "";
 
       items.forEach(it=>{
-        const card = document.createElement("div");
-        card.className = "item";
-        if (isSoldOut(it)) card.classList.add("soldout");
-
         const url = `${location.pathname}?id=${encodeURIComponent(it.id)}`;
-        const type = pick(it["分類タイプ"], it.style_en, it.style_jp, "—");
-        const region = pick(it.region_en, it.region_jp, "—");
-        card.innerHTML = `
-        ${bgLayersHtml(it.id)}
-        <div class="n">${escapeHtml(it.name_jp || it.id || "—")}</div>
-        <div class="s">${escapeHtml(it.name_en || "")}</div>
-        <div class="badge">${escapeHtml(type)} · <span class="muted">${escapeHtml(region)}</span></div>
-        <div class="go">
-            <a class="btn secondary" href="${url}">Open / 開く</a>
-        </div>
-        `;
+        const st = ratingStats?.[it.id] || { avg: null, count: 0 };
+        const avgText = Number.isFinite(st.avg) ? st.avg.toFixed(1) : "—";
+        const cntText = st.count ? `(${st.count})` : "(0)";
 
+        const card = document.createElement("div");
+        card.className = "item" + (isSoldOut(it) ? " soldout" : "");
+        card.innerHTML = cardHtmlCommon({
+          it,
+          url,
+          avgText,
+          cntText,
+          rankText: "",
+          showEdit: false,
+          showDelete: false
+        });
         list.appendChild(card);
       });
     }
@@ -1668,7 +1758,6 @@
       window.__currentBottleMeta = it;
 
       currentSakeId = it.id;
-      // ★ set background images (sheet + review)
       const sid = String(currentSakeId || "").trim();
       const url = `./image/${encodeURIComponent(sid)}.png`;
 
@@ -1735,17 +1824,13 @@
       const svg = japanSvgByWrapId["mapWrap"] || null;
       highlightPrefOnMap(svg, pref);
 
-      // ★ admin削除などの「残骸」をここで吸収
       const myReview = await reconcileAfterAdminDeleteIfNeeded(it.id);
 
-      // local posted hint（reconcile後に判断）
       const postedLocal = hasPostedLocal(currentSakeId);
       showPostedLocalHint(postedLocal && !isEdit);
 
-      // start listener
       listenReviewsShared(it.id);
 
-      // 編集モード or 既存レビューがあればプリフィル
       if (myReview){
         const nameEl = document.getElementById("rv_name");
         const ratingEl = document.getElementById("rv_rating");
@@ -1757,7 +1842,6 @@
         statusEl.textContent = "Edit mode: no existing review. You can post new one ✅ / 訂正対象が無いので新規投稿できます";
       }
 
-      // submit
       const submitBtn = document.getElementById("submitReviewBtn");
       if (submitBtn){
         const canEdit = isEdit || !!myReview;
@@ -1767,7 +1851,6 @@
 
         submitBtn.onclick = async () => {
           try{
-            // 通常投稿は「端末1回」ガード（編集は除外）
             if (!canEdit && hasPostedLocal(currentSakeId)){
               showPostedLocalHint(true);
               statusEl.textContent = "Already posted on this device / この端末では投稿済みです";
@@ -1800,10 +1883,8 @@
             document.getElementById("rv_msg").value = "";
             statusEl.textContent = canEdit ? "Updated ✅ / 更新しました" : "Posted ✅ / 投稿しました";
 
-            // ローカルガード
-            markPostedLocal(currentSakeId);
+            if (!canEdit) markPostedLocal(currentSakeId);
 
-            // UI
             showPostedLocalHint(!canEdit);
             submitBtn.disabled = !canEdit;
 
@@ -1815,8 +1896,6 @@
           }
         };
       }
-
-      // ✅ 銘柄ページの「Delete my review」ボタンは不要なので追加しない（完全撤去）
 
       const exportBtn = document.getElementById("exportReviewsBtn");
       if (exportBtn){
@@ -1871,7 +1950,6 @@
         // My Page
         if(!targetId){
           document.getElementById("listCard").style.display = "";
-
           document.getElementById("countTag").textContent = `${items.length} bottles`;
 
           try{
@@ -1879,30 +1957,6 @@
             setMyNameBadge(prof.displayName || "");
           }catch(_){}
 
-          // change name
-          const changeBtn = document.getElementById("changeNameBtn");
-          if (changeBtn){
-            changeBtn.onclick = async () => {
-              const current = localStorage.getItem(LS_NAME_KEY) || "";
-              const next = prompt("表示名（次回以降の投稿名）を入力してください（30文字以内）", current);
-              if (next === null) return;
-              const nm = String(next || "").trim().slice(0,30);
-              if (!nm){
-                alert("空は不可です。");
-                return;
-              }
-              try{
-                await saveMyDisplayName(nm);
-                setMyNameBadge(nm);
-                statusEl.textContent = "Name updated ✅ / 名前を更新しました";
-              }catch(e){
-                console.error(e);
-                statusEl.textContent = "Name update failed / 更新失敗";
-              }
-            };
-          }
-
-          // ✅ reset device data
           const resetBtn = document.getElementById("resetBtn");
           if (resetBtn){
             resetBtn.onclick = async () => {
@@ -1910,9 +1964,19 @@
             };
           }
 
-          // 初回描画
           await refreshMyPageAfterChange();
-          renderAllBottles(items);
+
+          let ratingStats = {};
+          try{
+            ratingStats = await loadRatingStatsForAll(items.map(x=>x.id));
+          }catch(e){
+            console.warn("ratingStats failed", e);
+            ratingStats = {};
+          }
+
+          renderTop5(items, ratingStats);
+          renderAllBottles(items, ratingStats);
+
           return;
         }
 
@@ -1922,7 +1986,7 @@
           statusEl.textContent = "Not found / 銘柄IDが見つかりません";
           document.getElementById("listCard").style.display = "";
           document.getElementById("countTag").textContent = `${items.length} bottles`;
-          renderAllBottles(items);
+          renderAllBottles(items, {});
           return;
         }
 
