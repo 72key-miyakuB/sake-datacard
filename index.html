@@ -447,27 +447,35 @@
       z-index:0;
     }
 
-    /* ====== sheet background ====== */
-    #sheetCard{ position:relative; }
-    #sheetBg{
-      position:absolute;
-      inset:0;
-      pointer-events:none;
-      z-index:0;
-      background-repeat:no-repeat;
-      background-position: 90% 80%;
-      background-size: 260px auto;  /* 小さめ */
-      opacity: .12;                 /* うっすら */
-      filter: saturate(1.05) contrast(1.1);
-    }
+/* ★ bottle background layer for sheetCard (TOP ONLY) */
+#sheetCard{ position:relative; overflow:hidden; }
 
-    /* sheetCard内の通常コンテンツは前面 */
-    #sheetCard .hd,
-    #sheetCard .body,
-    #sheetCard .footnote{
-      position:relative;
-      z-index:1;
-    }
+/* 上部（〜スペックぐらい）にだけ背景を出す */
+#sheetBg.sheetBg{
+  position:absolute;
+  left:0; right:0; top:0;
+  height: 360px;            /* ← “スペックまで”に収める高さ。足りなければ 320〜420で調整 */
+  pointer-events:none;
+  z-index:0;
+
+  background-repeat:no-repeat;
+  background-size: 220px auto;   /* ← 小さく */
+  background-position: 92% 80%;  /* ← 上に上げる（%の2つ目を小さくすると上へ） */
+  opacity: .12;                  /* ← うっすら */
+  filter: saturate(1.05) contrast(1.05);
+
+  /* 下に向かって自然に消す（境界が見えない） */
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 70%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 70%, transparent 100%);
+}
+
+/* ★ content should be above the bg */
+#sheetCard .hd,
+#sheetCard .body,
+#sheetCard .footnote{
+  position:relative;
+  z-index:1;
+}
 
     /* ====== review background (inside reviewHead only) ====== */
     #reviewHead{ position:relative; overflow:hidden; }
