@@ -151,24 +151,49 @@
     }
     .mapwrap{ width:100%; display:flex; justify-content:center; }
 
+    /* --- 地図の境界線をはっきりさせる修正 --- */
     .mapwrap svg{
       width:100%;
       max-width: 420px;
       height:auto;
       display:block;
     }
-    .pref{
-      fill: rgba(255,255,255,.06);
-      stroke: rgba(255,255,255,.18);
-      stroke-width: 1;
+
+    /* 修正：地図の境界線を明るいグレーにして太くする（!importantで強制適用） */
+    .pref {
+      fill: rgba(255, 255, 255, .06) !important;
+      stroke: rgba(255, 255, 255, 0.45) !important; /* 線の色を明るく */
+      stroke-width: 1.2 !important;               /* 線を太く */
       transition: .18s ease;
     }
     .pref.dim{ opacity: .40; }
     .pref.active{
-      fill: rgba(215,181,109,.78);
-      stroke: rgba(215,181,109,.98);
+      fill: rgba(215,181,109,.78) !important;
+      stroke: rgba(215,181,109,.98) !important;
       filter: drop-shadow(0 0 10px rgba(215,181,109,.45));
       opacity: 1;
+    }
+
+    /* --- 中央の白線を細く目立たなくする修正 --- */
+    .chart{
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(255,255,255,.03);
+      margin-top: 10px;
+    }
+
+    /* 修正後：チャート内の中央線を細く、透明度を上げる */
+    .chart svg line {
+      stroke: rgba(255, 255, 255, 0.15) !important; /* 透明度を上げて目立たなくする */
+      stroke-width: 0.5 !important;                /* 線を細くする */
+    }
+
+    /* 修正：チャートの中央線とグリッドを細く、透明にする */
+    .chart svg line, 
+    .chart svg polygon[fill="none"] {
+      stroke: rgba(255, 255, 255, 0.15) !important;
+      stroke-width: 0.8 !important;
     }
 
     .story{
@@ -204,13 +229,6 @@
     }
     .bar .val{ width: 28px; text-align:right; font-size: 12px; color: var(--muted); }
 
-    .chart{
-      padding: 12px;
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      background: rgba(255,255,255,.03);
-      margin-top: 10px;
-    }
     .chart .caption{
       display:flex; justify-content:space-between; align-items:center;
       font-size:12px; color: var(--muted); margin-bottom: 8px;
@@ -502,6 +520,24 @@
     .scoreBadge small{
       color: var(--muted);
       font-size: 10px;
+    }
+    /* 強制適用：個別ページの地図の境界線をくっきりさせ、チャートの線を細くする */
+    #mapWrap svg .pref, #myMapWrap svg .pref {
+      stroke: rgba(255, 255, 255, 0.5) !important;
+      stroke-width: 2.0 !important;
+      stroke-linejoin: round !important;
+    }
+
+    /* アクティブな（選択された）県の境界線をさらに強調 */
+    #mapWrap svg .pref.active, #myMapWrap svg .pref.active {
+      stroke: rgba(215, 181, 109, 1) !important;
+      stroke-width: 2.5 !important;
+    }
+
+    /* チャートの白線を極細にして目立たなくする */
+    .svgwrap svg line, .svgwrap svg polygon[fill="none"] {
+      stroke: rgba(255, 255, 255, 0.15) !important;
+      stroke-width: 0.5 !important;
     }
   </style>
 </head>
@@ -1352,8 +1388,11 @@
       if (!reviewed || reviewed.length === 0){
         listEl.innerHTML = `
           <div class="item" style="grid-column:1/-1;">
-            <div class="n">まだ履歴がありません</div>
-            <div class="s">QRで銘柄ページ → レビュー投稿すると、ここに追加されます。</div>
+            <div class="n">まだ履歴がありません / No review history yet.</div>
+            <div class="s">
+              QRで銘柄ページ → レビュー投稿すると、ここに追加されます。<br>
+              Scan a QR code → visit bottle page → post a review to add it here.
+            </div>
           </div>
         `;
         return;
